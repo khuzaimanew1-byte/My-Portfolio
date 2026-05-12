@@ -133,17 +133,6 @@ function DrawEdge({
         style={{ transition: "stroke-dashoffset 0.5s ease, stroke-opacity 0.3s ease" }}
       />
 
-      {/* travelling dot when active */}
-      {active && (
-        <circle r={2.5} fill={colorA} opacity={0.9}>
-          <animateMotion
-            dur="0.9s"
-            begin="0s"
-            repeatCount="indefinite"
-            path={`M${ax},${ay} L${bx},${by}`}
-          />
-        </circle>
-      )}
     </g>
   );
 }
@@ -232,44 +221,6 @@ export function Skills() {
                   onMouseEnter={() => setHovered(node.id)}
                   onMouseLeave={() => setHovered(null)}
                 >
-                  {/* outer glow pulse when hovered */}
-                  {isHovered && (
-                    <circle
-                      cx={node.x} cy={node.y}
-                      r={NODE_R + 16}
-                      fill="none"
-                      stroke={node.color}
-                      strokeWidth={1}
-                      strokeOpacity={0.25}
-                      style={{ filter: `drop-shadow(0 0 10px ${node.color})` }}
-                    />
-                  )}
-
-                  {/* ring for connected */}
-                  {connected && (
-                    <circle
-                      cx={node.x} cy={node.y}
-                      r={NODE_R + 9}
-                      fill="none"
-                      stroke={node.color}
-                      strokeWidth={0.8}
-                      strokeOpacity={0.35}
-                    />
-                  )}
-
-                  {/* icon circle */}
-                  <circle
-                    cx={node.x} cy={node.y}
-                    r={NODE_R}
-                    fill={isHovered ? `${node.color}1A` : "rgba(255,255,255,0.03)"}
-                    stroke={
-                      isHovered  ? node.color :
-                      connected  ? `${node.color}55` :
-                                   "rgba(255,255,255,0.1)"
-                    }
-                    strokeWidth={isHovered ? 1.5 : 0.8}
-                    style={{ transition: "all 0.3s ease" }}
-                  />
 
                   {/* icon via foreignObject — always real brand color */}
                   <foreignObject
