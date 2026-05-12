@@ -1,0 +1,105 @@
+Deeply analyze the current Technical Arsenal section and rebuild it into a cinematic floating intelligence network.
+
+Use ONLY authentic official SVG icons/logos.
+Replace all inaccurate or fake icons immediately.
+
+Required official visuals:
+
+HTML5
+CSS3
+JavaScript
+Node.js
+Express.js
+MongoDB
+Git
+VS Code
+OpenAI / AI tooling
+EJS
+
+Do not use a static grid layout.
+
+Create an organic cinematic composition:
+
+asymmetrical positioning
+layered depth
+intelligent spacing
+clustered rhythm
+preserved negative space
+center breathing room
+
+Icons should:
+
+float subtly
+drift independently
+react softly to cursor proximity
+stabilize smoothly after movement
+never shake aggressively
+never overlap awkwardly
+
+Add animated curved SVG connection lines.
+
+IMPORTANT:
+When hovering an icon:
+
+lines should feel like they are EMERGING from that icon
+the hovered icon becomes the active source node
+connected lines animate outward organically
+line flow should feel directional and alive
+nearby connected icons activate progressively
+
+Hovered line color MUST inherit the hovered icon color:
+
+CSS icon → blue connection glow
+MongoDB → green lines
+JavaScript → yellow lines
+Git → orange/red lines
+etc
+
+Connection line behavior:
+
+bezier curve lines only
+smooth cinematic movement
+traveling energy pulses through curves
+opacity breathes subtly
+curves reform dynamically during movement
+no straight robotic network lines
+no chaotic web effect
+
+Hover interaction:
+
+hovered icon gains cinematic focus glow
+connected icons subtly respond
+tooltip appears with:
+technology name
+short role/purpose text
+tooltip motion uses inertia
+tooltip intelligently avoids overlap
+
+Visual atmosphere:
+
+subtle environmental fog
+restrained ambient particles
+soft operational gradients
+cinematic teal depth lighting
+premium dark-space environment
+
+Motion rules:
+
+no repetitive looping feel
+movement derived from layered offsets
+easing + inertia everywhere
+physically believable settling
+smooth transitions only
+
+Do not create:
+
+gaming visuals
+neon spam
+crowded compositions
+aggressive hover effects
+fast motion
+flat layouts
+random line explosions
+
+Final result should feel like:
+a premium cinematic intelligence network where each technology node feels alive, interconnected, and operationally aware inside a floating atmospheric system.
