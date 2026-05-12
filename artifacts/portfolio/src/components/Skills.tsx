@@ -166,7 +166,14 @@ function Edge({
         <path id={pathRefId} d={d} />
       </defs>
 
-      {/* ── soft outer glow (active only) ─────────────────────── */}
+      <style>{`
+        @keyframes drawLine-${uid} {
+          from { stroke-dashoffset: 1; }
+          to   { stroke-dashoffset: 0; }
+        }
+      `}</style>
+
+      {/* ── soft outer glow (active only, animated draw) ────────── */}
       {active && (
         <path
           d={d}
@@ -175,11 +182,15 @@ function Edge({
           strokeWidth={1.4}
           strokeLinecap="round"
           strokeOpacity={0.08}
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={0}
           filter={`url(#blur-halo-${uid})`}
+          style={{ animation: `drawLine-${uid} 0.55s cubic-bezier(0.4,0,0.2,1) forwards` }}
         />
       )}
 
-      {/* ── core signal line (active only) ────────────────────── */}
+      {/* ── core signal line (active only, animated draw) ───────── */}
       {active && (
         <path
           d={d}
@@ -188,6 +199,10 @@ function Edge({
           strokeWidth={0.35}
           strokeLinecap="round"
           strokeOpacity={0.9}
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={0}
+          style={{ animation: `drawLine-${uid} 0.5s cubic-bezier(0.4,0,0.2,1) forwards` }}
         />
       )}
 
