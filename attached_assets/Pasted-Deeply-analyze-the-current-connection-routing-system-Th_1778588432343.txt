@@ -1,0 +1,73 @@
+Deeply analyze the current connection routing system.
+
+The real issue:
+The curves are mathematically connecting nodes,
+but compositionally they are wrong.
+
+Problems:
+- curves are too large and empty
+- lines create giant visual arcs across the section
+- paths intersect awkwardly
+- network spacing feels disconnected
+- visual flow is weak
+- no cinematic routing hierarchy
+- lines dominate negative space incorrectly
+- animation has no visible intelligence flow
+
+Rebuild the network routing and animation system.
+
+Connection layout rules:
+- create SHORTER localized connections
+- prefer nearby-node relationships
+- avoid giant empty curves across the whole canvas
+- build clustered network groups
+- preserve cinematic balance
+- maintain clean negative space
+
+Path behavior:
+- curves should wrap naturally around nearby icons
+- avoid large U-shaped arcs
+- avoid crossing through the visual center unnecessarily
+- control points should adapt intelligently to spatial layout
+- route lines through logical visual flow paths
+
+Animation rebuild:
+- lines should remain extremely subtle while idle
+- on hover, active signal should travel progressively
+- signal flow must move node-to-node sequentially
+- only active path regions illuminate
+- inactive path regions stay barely visible
+
+IMPORTANT:
+Do NOT animate the entire line.
+Animate ONLY the moving signal traveling through the curve.
+
+Signal behavior:
+- pulse emerges from source node center
+- moves directionally along bezier path
+- leaves soft fading trail
+- target node activates on arrival
+- next connection starts after arrival
+
+Visual styling:
+- ultra-thin cinematic strokes
+- soft atmospheric glow only near active pulse
+- subtle opacity falloff
+- anti-aliased rendering
+- no thick neon curves
+- no static glowing paths
+
+Spatial fixes:
+- lines must stay behind icons
+- no overlap over icon glyphs
+- anchor perfectly to node centers
+- maintain clean breathing room around each node
+
+Composition upgrade:
+- connections should feel intentional and intelligent
+- network should guide the eye naturally
+- no random web appearance
+- no oversized decorative arcs
+
+Final feeling:
+a premium cinematic intelligence network where subtle localized signal paths intelligently transmit energy between floating technology nodes.

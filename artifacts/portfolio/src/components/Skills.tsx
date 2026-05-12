@@ -30,17 +30,27 @@ const nodes = [
 ];
 
 /* ── Edges ─────────────────────────────────────────────────── */
+/* bend intentionally small to avoid large compositional arcs  */
 const edges: { a: string; b: string; bend: number; depth?: "back" | "front" }[] = [
-  { a: "html",    b: "css",     bend:  0.18, depth: "back"  },
-  { a: "html",    b: "ejs",     bend: -0.18, depth: "back"  },
-  { a: "css",     b: "js",      bend:  0.14, depth: "front" },
-  { a: "ejs",     b: "js",      bend: -0.14, depth: "front" },
-  { a: "js",      b: "nodejs",  bend:  0.16, depth: "front" },
-  { a: "js",      b: "git",     bend: -0.16, depth: "front" },
-  { a: "nodejs",  b: "express", bend:  0.13, depth: "back"  },
-  { a: "express", b: "mongodb", bend:  0.15, depth: "front" },
-  { a: "express", b: "vscode",  bend: -0.06, depth: "front" },
-  { a: "express", b: "ai",      bend: -0.15, depth: "back"  },
+  /* left cluster */
+  { a: "html",    b: "css",     bend:  0.07, depth: "back"  },
+  { a: "html",    b: "ejs",     bend: -0.07, depth: "back"  },
+  /* left → center */
+  { a: "css",     b: "js",      bend:  0.06, depth: "front" },
+  { a: "ejs",     b: "js",      bend: -0.06, depth: "front" },
+  /* center hub → center-right */
+  { a: "js",      b: "nodejs",  bend:  0.07, depth: "front" },
+  { a: "js",      b: "git",     bend: -0.07, depth: "front" },
+  { a: "js",      b: "express", bend:  0.04, depth: "front" },
+  /* top rail */
+  { a: "nodejs",  b: "mongodb", bend:  0.05, depth: "back"  },
+  /* center-right → right */
+  { a: "nodejs",  b: "express", bend:  0.05, depth: "back"  },
+  { a: "git",     b: "express", bend: -0.05, depth: "back"  },
+  /* right cluster — tight local connections */
+  { a: "express", b: "vscode",  bend:  0.04, depth: "front" },
+  { a: "mongodb", b: "vscode",  bend:  0.04, depth: "front" },
+  { a: "vscode",  b: "ai",      bend:  0.03, depth: "front" },
 ];
 
 function getNode(id: string) { return nodes.find(n => n.id === id)!; }
@@ -52,7 +62,7 @@ function isConnected(id: string, hov: string | null) {
 /* ── Coordinate system ─────────────────────────────────────── */
 const AR = 0.48;
 const toSvgY = (y: number) => y * AR;
-const SAFE_RADIUS = 9.5;
+const SAFE_RADIUS = 5.0;
 
 /* ── Cubic bezier point evaluation ────────────────────────── */
 function cubicPt(p0: number, p1: number, p2: number, p3: number, t: number) {
@@ -91,7 +101,7 @@ function smartPath(
           rx += (ddx / d) * s; ry += (ddy / d) * s; hit = true;
         }
       }
-      if (hit) { cp1x += rx * 0.45; cp1y += ry * 0.45; cp2x += rx * 0.45; cp2y += ry * 0.45; }
+      if (hit) { cp1x += rx * 0.22; cp1y += ry * 0.22; cp2x += rx * 0.22; cp2y += ry * 0.22; }
     }
   }
   return `M${x1.toFixed(3)},${y1.toFixed(3)} C${cp1x.toFixed(3)},${cp1y.toFixed(3)} ${cp2x.toFixed(3)},${cp2y.toFixed(3)} ${x2.toFixed(3)},${y2.toFixed(3)}`;
