@@ -1,297 +1,180 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, useSpring, useTransform, AnimatePresence } from "framer-motion";
 import {
-  SiHtml5, SiJavascript, SiNodedotjs, SiExpress,
-  SiMongodb, SiGit, SiOpenai, SiCss,
+  SiHtml5,
+  SiJavascript,
+  SiNodedotjs,
+  SiExpress,
+  SiMongodb,
+  SiGit,
+  SiOpenai,
+  SiCss,
 } from "react-icons/si";
-import { FileCode2 } from "lucide-react";
+import { FileCode2, Code2 } from "lucide-react";
 
-/* ── VS Code icon ──────────────────────────────────────────── */
+/* ── Official inline SVG for VS Code (Simple Icons path) ──── */
 function VSCodeIcon({ size, style }: { size: number; style?: React.CSSProperties }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style}>
-      <path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z" fill="currentColor" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style} xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"
+        fill="currentColor"
+      />
     </svg>
   );
 }
 
-/* ── Nodes ─────────────────────────────────────────────────── */
+/* ── node definitions  (x,y = % of container 0–100) ─────── */
 const nodes = [
-  { id: "html",    name: "HTML",       icon: SiHtml5,      color: "#E34F26", role: "Semantic structure & accessible markup",          x: 9,  y: 50, floatY: [-6, 4],  dur: 4.4 },
-  { id: "css",     name: "CSS3",       icon: SiCss,        color: "#264DE4", role: "Responsive layouts, animations & design systems", x: 22, y: 16, floatY: [-5, 7],  dur: 5.1 },
-  { id: "ejs",     name: "EJS",        icon: FileCode2,    color: "#B9473A", role: "Server-side JS templating for dynamic views",     x: 22, y: 79, floatY: [-7, 4],  dur: 4.7, isLucide: true },
-  { id: "js",      name: "JavaScript", icon: SiJavascript, color: "#F0DB4F", role: "ES6+, async logic, event-driven interaction",     x: 43, y: 48, floatY: [-5, 6],  dur: 3.9 },
-  { id: "nodejs",  name: "Node.js",    icon: SiNodedotjs,  color: "#3C873A", role: "Server runtime, REST APIs, event loop",          x: 60, y: 15, floatY: [-8, 3],  dur: 4.6 },
-  { id: "git",     name: "Git",        icon: SiGit,        color: "#F05032", role: "Version control, branching, collaborative code",  x: 60, y: 77, floatY: [-4, 8],  dur: 5.3 },
-  { id: "express", name: "Express.js", icon: SiExpress,    color: "#c0c0c0", role: "Routing, middleware, RESTful API patterns",       x: 76, y: 46, floatY: [-5, 5],  dur: 4.2 },
-  { id: "mongodb", name: "MongoDB",    icon: SiMongodb,    color: "#47A248", role: "Document storage, aggregation, schema design",    x: 91, y: 17, floatY: [-6, 6],  dur: 3.8 },
-  { id: "vscode",  name: "VS Code",    icon: VSCodeIcon,   color: "#007ACC", role: "Primary IDE — extensions, debugging, workflow",   x: 91, y: 52, floatY: [-5, 7],  dur: 5.0, isCustom: true },
-  { id: "ai",      name: "AI Dev",     icon: SiOpenai,     color: "#10a37f", role: "AI-assisted code review, rapid prototyping",     x: 91, y: 81, floatY: [-7, 4],  dur: 4.3 },
+  {
+    id: "html",    name: "HTML",        icon: SiHtml5,      color: "#E34F26",
+    role: "Semantic structure & accessible markup",
+    x: 9,  y: 50, floatY: [-6, 4],  dur: 4.4,
+  },
+  {
+    id: "css",     name: "CSS3",        icon: SiCss,        color: "#264DE4",
+    role: "Responsive layouts, animations & design systems",
+    x: 22, y: 16, floatY: [-5, 7],  dur: 5.1,
+  },
+  {
+    id: "ejs",     name: "EJS",         icon: FileCode2,    color: "#B9473A",
+    role: "Server-side JS templating for dynamic views",
+    x: 22, y: 79, floatY: [-7, 4],  dur: 4.7, isLucide: true,
+  },
+  {
+    id: "js",      name: "JavaScript",  icon: SiJavascript, color: "#F0DB4F",
+    role: "ES6+, async logic, event-driven interaction",
+    x: 43, y: 48, floatY: [-5, 6],  dur: 3.9,
+  },
+  {
+    id: "nodejs",  name: "Node.js",     icon: SiNodedotjs,  color: "#3C873A",
+    role: "Server runtime, REST APIs, event loop",
+    x: 60, y: 15, floatY: [-8, 3],  dur: 4.6,
+  },
+  {
+    id: "git",     name: "Git",         icon: SiGit,        color: "#F05032",
+    role: "Version control, branching, collaborative code",
+    x: 60, y: 77, floatY: [-4, 8],  dur: 5.3,
+  },
+  {
+    id: "express", name: "Express.js",  icon: SiExpress,    color: "#c0c0c0",
+    role: "Routing, middleware, RESTful API patterns",
+    x: 76, y: 46, floatY: [-5, 5],  dur: 4.2,
+  },
+  {
+    id: "mongodb", name: "MongoDB",     icon: SiMongodb,    color: "#47A248",
+    role: "Document storage, aggregation, schema design",
+    x: 91, y: 17, floatY: [-6, 6],  dur: 3.8,
+  },
+  {
+    id: "vscode",  name: "VS Code",     icon: VSCodeIcon,   color: "#007ACC",
+    role: "Primary IDE — extensions, debugging, workflow",
+    x: 91, y: 52, floatY: [-5, 7],  dur: 5.0, isCustom: true,
+  },
+  {
+    id: "ai",      name: "AI Dev",      icon: SiOpenai,     color: "#10a37f",
+    role: "AI-assisted code review, rapid prototyping",
+    x: 91, y: 81, floatY: [-7, 4],  dur: 4.3,
+  },
 ];
 
-/* ── Edges ─────────────────────────────────────────────────── */
-/* bend intentionally small to avoid large compositional arcs  */
-const edges: { a: string; b: string; bend: number; depth?: "back" | "front" }[] = [
-  /* left cluster */
-  { a: "html",    b: "css",     bend:  0.07, depth: "back"  },
-  { a: "html",    b: "ejs",     bend: -0.07, depth: "back"  },
-  /* left → center */
-  { a: "css",     b: "js",      bend:  0.06, depth: "front" },
-  { a: "ejs",     b: "js",      bend: -0.06, depth: "front" },
-  /* center hub → center-right */
-  { a: "js",      b: "nodejs",  bend:  0.07, depth: "front" },
-  { a: "js",      b: "git",     bend: -0.07, depth: "front" },
-  { a: "js",      b: "express", bend:  0.04, depth: "front" },
-  /* top rail */
-  { a: "nodejs",  b: "mongodb", bend:  0.05, depth: "back"  },
-  /* center-right → right */
-  { a: "nodejs",  b: "express", bend:  0.05, depth: "back"  },
-  { a: "git",     b: "express", bend: -0.05, depth: "back"  },
-  /* right cluster — tight local connections */
-  { a: "express", b: "vscode",  bend:  0.04, depth: "front" },
-  { a: "mongodb", b: "vscode",  bend:  0.04, depth: "front" },
-  { a: "vscode",  b: "ai",      bend:  0.03, depth: "front" },
+/* ── edges ──────────────────────────────────────────────── */
+const edges: { a: string; b: string; bend: number }[] = [
+  { a: "html",    b: "css",     bend:  0.14 },
+  { a: "html",    b: "ejs",     bend: -0.14 },
+  { a: "css",     b: "js",      bend:  0.11 },
+  { a: "ejs",     b: "js",      bend: -0.11 },
+  { a: "js",      b: "nodejs",  bend:  0.13 },
+  { a: "js",      b: "git",     bend: -0.13 },
+  { a: "nodejs",  b: "express", bend:  0.10 },
+  { a: "express", b: "mongodb", bend:  0.12 },
+  { a: "express", b: "vscode",  bend: -0.08 },
+  { a: "express", b: "ai",      bend: -0.12 },
 ];
 
-function getNode(id: string) { return nodes.find(n => n.id === id)!; }
+function getNode(id: string) { return nodes.find((n) => n.id === id)!; }
 function isConnected(id: string, hov: string | null) {
   if (!hov || hov === id) return false;
   return edges.some(({ a, b }) => (a === hov && b === id) || (b === hov && a === id));
 }
 
-/* ── Coordinate system ─────────────────────────────────────── */
+/* ── viewBox: "0 0 100 48" matches paddingBottom:48% container
+      svgY = cssY * 0.48 ─────────────────────────────────── */
 const AR = 0.48;
-const toSvgY = (y: number) => y * AR;
-const SAFE_RADIUS = 5.0;
+const svgY = (y: number) => +(y * AR).toFixed(3);
 
-/* ── Cubic bezier point evaluation ────────────────────────── */
-function cubicPt(p0: number, p1: number, p2: number, p3: number, t: number) {
-  const m = 1 - t;
-  return m * m * m * p0 + 3 * m * m * t * p1 + 3 * m * t * t * p2 + t * t * t * p3;
-}
-
-/* ── Smart bezier path with node avoidance ─────────────────── */
-function smartPath(
-  x1: number, y1: number, x2: number, y2: number,
-  bend: number,
-  avoid: Array<{ x: number; y: number; id: string }>,
-  skip: string[]
-): string {
+function bezierPath(
+  x1: number, y1: number, x2: number, y2: number, bend: number
+) {
   const dx = x2 - x1, dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const px = -dy / len, py = dx / len;
   const off = len * bend;
-
-  let cp1x = x1 + dx * 0.33 + px * off;
-  let cp1y = y1 + dy * 0.33 + py * off;
-  let cp2x = x2 - dx * 0.33 + px * off;
-  let cp2y = y2 - dy * 0.33 + py * off;
-
-  for (let iter = 0; iter < 3; iter++) {
-    for (const n of avoid) {
-      if (skip.includes(n.id)) continue;
-      let rx = 0, ry = 0, hit = false;
-      for (let t = 0.12; t <= 0.88; t += 0.19) {
-        const qx = cubicPt(x1, cp1x, cp2x, x2, t);
-        const qy = cubicPt(y1, cp1y, cp2y, y2, t);
-        const ddx = qx - n.x, ddy = qy - n.y;
-        const d = Math.sqrt(ddx * ddx + ddy * ddy);
-        if (d < SAFE_RADIUS && d > 0.01) {
-          const s = Math.pow((SAFE_RADIUS - d) / SAFE_RADIUS, 1.4) * 8;
-          rx += (ddx / d) * s; ry += (ddy / d) * s; hit = true;
-        }
-      }
-      if (hit) { cp1x += rx * 0.22; cp1y += ry * 0.22; cp2x += rx * 0.22; cp2y += ry * 0.22; }
-    }
-  }
-  return `M${x1.toFixed(3)},${y1.toFixed(3)} C${cp1x.toFixed(3)},${cp1y.toFixed(3)} ${cp2x.toFixed(3)},${cp2y.toFixed(3)} ${x2.toFixed(3)},${y2.toFixed(3)}`;
+  const cp1x = (x1 + dx * 0.35 + px * off).toFixed(3);
+  const cp1y = (y1 + dy * 0.35 + py * off).toFixed(3);
+  const cp2x = (x2 - dx * 0.35 + px * off).toFixed(3);
+  const cp2y = (y2 - dy * 0.35 + py * off).toFixed(3);
+  return `M${x1},${y1} C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
 }
 
-/* ── Easing ────────────────────────────────────────────────── */
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
-/* ── Trail size ────────────────────────────────────────────── */
-const TRAIL = 14;
-
-/* ── Edge component ────────────────────────────────────────── */
-let egCount = 0;
-
+/* ── Edge component ──────────────────────────────────────── */
+let egCounter = 0;
 function Edge({
-  edge, active, color, avoid,
-}: {
-  edge: { a: string; b: string; bend: number };
-  active: boolean;
-  color: string;
-  avoid: Array<{ x: number; y: number; id: string }>;
-}) {
+  edge, active, activeColor,
+}: { edge: { a: string; b: string; bend: number }; active: boolean; activeColor: string }) {
   const na = getNode(edge.a), nb = getNode(edge.b);
-  const ax = na.x, ay = toSvgY(na.y);
-  const bx = nb.x, by = toSvgY(nb.y);
-
-  const d = useMemo(
-    () => smartPath(ax, ay, bx, by, edge.bend, avoid, [edge.a, edge.b]),
-    [ax, ay, bx, by, edge.bend, avoid, edge.a, edge.b]
-  );
-
-  const [uid] = useState(() => `e${egCount++}`);
-
-  /* ── DOM refs for direct manipulation ── */
-  const pathEl    = useRef<SVGPathElement>(null);
-  const headEl    = useRef<SVGCircleElement>(null);
-  const glowEl    = useRef<SVGCircleElement>(null);
-  const trailEls  = useRef<(SVGCircleElement | null)[]>([]);
-  const activeRef = useRef(active);
-  const rafRef    = useRef<number>(0);
-  const toRef     = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => { activeRef.current = active; }, [active]);
-
-  /* ── rAF signal propagation loop ── */
-  useEffect(() => {
-    const path = pathEl.current;
-    const head = headEl.current;
-    const glow = glowEl.current;
-    const trail = trailEls.current;
-
-    function hide() {
-      if (head) head.setAttribute("opacity", "0");
-      if (glow) glow.setAttribute("opacity", "0");
-      trail.forEach(el => el?.setAttribute("opacity", "0"));
-    }
-
-    if (!active || !path) { hide(); return; }
-
-    cancelAnimationFrame(rafRef.current);
-    clearTimeout(toRef.current);
-
-    const totalLen = path.getTotalLength();
-    /* duration scales with path length: longer paths = more travel time */
-    const DURATION = Math.max(550, totalLen * 16);
-
-    let startTime: number | null = null;
-    const buf: { x: number; y: number }[] = [];
-
-    function tick(now: number) {
-      if (!activeRef.current) { hide(); return; }
-
-      if (!startTime) startTime = now;
-      const raw = Math.min((now - startTime) / DURATION, 1);
-      const eased = easeInOutCubic(raw);
-      const progress = eased * totalLen;
-
-      const pt = path.getPointAtLength(progress);
-
-      /* head particle */
-      if (head) {
-        head.setAttribute("cx", pt.x.toFixed(3));
-        head.setAttribute("cy", pt.y.toFixed(3));
-        head.setAttribute("opacity", "1");
-      }
-      if (glow) {
-        glow.setAttribute("cx", pt.x.toFixed(3));
-        glow.setAttribute("cy", pt.y.toFixed(3));
-        glow.setAttribute("opacity", "0.35");
-      }
-
-      /* trail */
-      buf.unshift({ x: pt.x, y: pt.y });
-      if (buf.length > TRAIL) buf.length = TRAIL;
-
-      for (let i = 0; i < TRAIL; i++) {
-        const el = trail[i];
-        const pos = buf[i + 1];
-        if (el && pos) {
-          el.setAttribute("cx", pos.x.toFixed(3));
-          el.setAttribute("cy", pos.y.toFixed(3));
-          /* opacity fades progressively: brightest near head, zero at tail */
-          const fade = Math.pow(1 - (i + 1) / (TRAIL + 1), 1.8) * 0.65;
-          el.setAttribute("opacity", fade.toFixed(3));
-          /* radius tapers */
-          const r = Math.max(0.08, 0.55 * (1 - (i + 1) / (TRAIL + 1)));
-          el.setAttribute("r", r.toFixed(3));
-        } else if (el) {
-          el.setAttribute("opacity", "0");
-        }
-      }
-
-      if (raw < 1) {
-        rafRef.current = requestAnimationFrame(tick);
-      } else {
-        /* signal arrived — pause, then re-emit */
-        hide();
-        buf.length = 0;
-        toRef.current = setTimeout(() => {
-          if (activeRef.current) {
-            startTime = null;
-            rafRef.current = requestAnimationFrame(tick);
-          }
-        }, 320);
-      }
-    }
-
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      clearTimeout(toRef.current);
-      hide();
-    };
-  }, [active]);
+  const ax = na.x, ay = svgY(na.y);
+  const bx = nb.x, by = svgY(nb.y);
+  const d = bezierPath(ax, ay, bx, by, edge.bend);
+  const [uid] = useState(() => `eg-${egCounter++}`);
 
   return (
     <g>
       <defs>
-        <filter id={`fg-${uid}`} x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="0.55" />
-        </filter>
+        <linearGradient id={uid} gradientUnits="userSpaceOnUse" x1={ax} y1={ay} x2={bx} y2={by}>
+          <stop offset="0%"   stopColor={activeColor} />
+          <stop offset="100%" stopColor={activeColor} stopOpacity={0.35} />
+        </linearGradient>
       </defs>
 
-      {/* structural guide — always visible, extremely subtle */}
-      <path
-        ref={pathEl}
-        d={d}
-        fill="none"
-        stroke="rgba(180,200,220,1)"
-        strokeWidth={0.14}
+      {/* main line */}
+      <path d={d} fill="none"
+        stroke={active ? `url(#${uid})` : "transparent"}
+        strokeWidth={0.3}
         strokeLinecap="round"
-        strokeOpacity={active ? 0.13 : 0.045}
-        style={{ transition: "stroke-opacity 0.4s ease" }}
+        pathLength={1}
+        strokeDasharray={1}
+        strokeDashoffset={active ? 0 : 1}
+        style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1), stroke 0.2s" }}
+      />
+      {/* glow */}
+      <path d={d} fill="none"
+        stroke={active ? activeColor : "transparent"}
+        strokeWidth={1.4}
+        strokeLinecap="round"
+        pathLength={1}
+        strokeDasharray={1}
+        strokeDashoffset={active ? 0 : 1}
+        strokeOpacity={0.10}
+        style={{ filter: "blur(1.5px)", transition: "stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1), stroke 0.2s" }}
       />
 
-      {/* trail dots — updated via direct DOM */}
-      {Array.from({ length: TRAIL }, (_, i) => (
-        <circle
-          key={i}
-          ref={el => { trailEls.current[i] = el; }}
-          r={0.55}
-          fill={color}
-          opacity={0}
-        />
-      ))}
-
-      {/* glow halo around head */}
-      <circle
-        ref={glowEl}
-        r={1.6}
-        fill={color}
-        opacity={0}
-        filter={`url(#fg-${uid})`}
-      />
-
-      {/* head particle */}
-      <circle
-        ref={headEl}
-        r={0.62}
-        fill={color}
-        opacity={0}
-      />
+      {/* energy pulse */}
+      {active && (
+        <>
+          <path id={`path-${uid}`} d={d} fill="none" stroke="none" />
+          <circle r={0.8} fill={activeColor} opacity={0.85}>
+            <animateMotion dur="1.1s" repeatCount="indefinite" begin="0s">
+              <mpath href={`#path-${uid}`} />
+            </animateMotion>
+          </circle>
+        </>
+      )}
     </g>
   );
 }
 
-/* ── Skills section ────────────────────────────────────────── */
+/* ── main ────────────────────────────────────────────────── */
 export function Skills() {
   const [hovered, setHovered] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -301,16 +184,11 @@ export function Skills() {
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const r = containerRef.current!.getBoundingClientRect();
     springX.set(((e.clientX - r.left) / r.width) * 100);
-    springY.set(((e.clientY - r.top) / r.height) * 100);
+    springY.set(((e.clientY - r.top)  / r.height) * 100);
   }, [springX, springY]);
 
   const hNode = hovered ? getNode(hovered) : null;
   const activeColor = hNode?.color ?? "#2dd4bf";
-
-  const avoid = useMemo(() => nodes.map(n => ({ id: n.id, x: n.x, y: toSvgY(n.y) })), []);
-
-  const backEdges  = edges.filter(e => e.depth === "back");
-  const frontEdges = edges.filter(e => e.depth !== "back");
 
   return (
     <section className="py-28 relative overflow-hidden">
@@ -320,8 +198,10 @@ export function Skills() {
 
       <div className="container mx-auto px-6 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} className="text-center max-w-2xl mx-auto mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center max-w-2xl mx-auto mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Technical Arsenal</h2>
           <p className="text-muted-foreground text-lg">
@@ -331,21 +211,29 @@ export function Skills() {
 
         <motion.div
           ref={containerRef}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
-          viewport={{ once: true }} transition={{ duration: 0.8 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
           className="relative max-w-5xl mx-auto select-none"
           style={{ paddingBottom: "48%" }}
           onMouseMove={onMouseMove}
           onMouseLeave={() => { setHovered(null); springX.set(50); springY.set(50); }}
         >
-          {/* back-depth SVG */}
-          <svg viewBox={`0 0 100 ${100 * AR}`} preserveAspectRatio="none"
+          {/* SVG overlay — viewBox matches 100:48 aspect ratio */}
+          <svg
+            viewBox={`0 0 100 ${100 * AR}`}
+            preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: "none", overflow: "visible", zIndex: 1 }}>
-            {backEdges.map(edge => (
-              <Edge key={`b-${edge.a}-${edge.b}`} edge={edge}
+            style={{ pointerEvents: "none", overflow: "visible" }}
+          >
+            {edges.map((edge) => (
+              <Edge
+                key={`${edge.a}-${edge.b}`}
+                edge={edge}
                 active={hovered === edge.a || hovered === edge.b}
-                color={activeColor} avoid={avoid} />
+                activeColor={activeColor}
+              />
             ))}
           </svg>
 
@@ -355,11 +243,20 @@ export function Skills() {
             const isHov     = hovered === node.id;
             const connected = isConnected(node.id, hovered);
             const dimmed    = hovered !== null && !isHov && !connected;
+
             return (
-              <NodeIcon key={node.id} node={node} index={i}
-                isHovered={isHov} connected={connected} dimmed={dimmed}
-                springMouseX={springX} springMouseY={springY}
-                onEnter={() => setHovered(node.id)} onLeave={() => setHovered(null)}>
+              <NodeIcon
+                key={node.id}
+                node={node}
+                index={i}
+                isHovered={isHov}
+                connected={connected}
+                dimmed={dimmed}
+                springMouseX={springX}
+                springMouseY={springY}
+                onEnter={() => setHovered(node.id)}
+                onLeave={() => setHovered(null)}
+              >
                 <Icon
                   size={node.isCustom ? 20 : node.isLucide ? 21 : 23}
                   style={{
@@ -371,24 +268,13 @@ export function Skills() {
               </NodeIcon>
             );
           })}
-
-          {/* front-depth SVG */}
-          <svg viewBox={`0 0 100 ${100 * AR}`} preserveAspectRatio="none"
-            className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: "none", overflow: "visible", zIndex: 2 }}>
-            {frontEdges.map(edge => (
-              <Edge key={`f-${edge.a}-${edge.b}`} edge={edge}
-                active={hovered === edge.a || hovered === edge.b}
-                color={activeColor} avoid={avoid} />
-            ))}
-          </svg>
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* ── NodeIcon ──────────────────────────────────────────────── */
+/* ── NodeIcon ───────────────────────────────────────────── */
 function NodeIcon({
   node, index, isHovered, connected, dimmed,
   springMouseX, springMouseY, onEnter, onLeave, children,
@@ -404,26 +290,36 @@ function NodeIcon({
   onLeave: () => void;
   children: React.ReactNode;
 }) {
-  const dx = useTransform(springMouseX, mx => {
+  const dx = useTransform(springMouseX, (mx) => {
     const my = springMouseY.get();
     const dist = Math.sqrt((mx - node.x) ** 2 + (my - node.y) ** 2);
-    return (node.x - mx) / Math.max(dist, 1) * Math.max(0, 1 - dist / 16) * 2.5;
+    const strength = Math.max(0, 1 - dist / 16) * 2.5;
+    return (node.x - mx) / Math.max(dist, 1) * strength;
   });
-  const dy = useTransform(springMouseY, my => {
+  const dy = useTransform(springMouseY, (my) => {
     const mx = springMouseX.get();
     const dist = Math.sqrt((mx - node.x) ** 2 + (my - node.y) ** 2);
-    return (node.y - my) / Math.max(dist, 1) * Math.max(0, 1 - dist / 16) * 2.5;
+    const strength = Math.max(0, 1 - dist / 16) * 2.5;
+    return (node.y - my) / Math.max(dist, 1) * strength;
   });
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.3 }} whileInView={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.3 }}
+      whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.07, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-      animate={{ opacity: dimmed ? 0.12 : 1 }}
-      style={{ position: "absolute", left: `${node.x}%`, top: `${node.y}%`,
-        transform: "translate(-50%,-50%)", x: dx, y: dy, zIndex: isHovered ? 20 : 10 }}
-      onMouseEnter={onEnter} onMouseLeave={onLeave}
+      animate={{ opacity: dimmed ? 0.15 : 1 }}
+      style={{
+        position: "absolute",
+        left: `${node.x}%`,
+        top:  `${node.y}%`,
+        transform: "translate(-50%, -50%)",
+        x: dx, y: dy,
+        zIndex: isHovered ? 20 : 10,
+      }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
     >
       <motion.div
         animate={{ y: node.floatY }}
@@ -434,8 +330,11 @@ function NodeIcon({
           whileHover={{ scale: 1.25 }}
           transition={{ type: "spring", stiffness: 320, damping: 22 }}
           style={{
-            filter: isHovered ? `drop-shadow(0 0 9px ${node.color}99)`
-              : connected ? `drop-shadow(0 0 4px ${node.color}44)` : "none",
+            filter: isHovered
+              ? `drop-shadow(0 0 9px ${node.color}99)`
+              : connected
+              ? `drop-shadow(0 0 4px ${node.color}44)`
+              : "none",
             transition: "filter 0.3s ease",
           }}
         >
@@ -443,12 +342,17 @@ function NodeIcon({
         </motion.div>
 
         <span style={{
-          fontSize: 9, fontFamily: "Inter, sans-serif",
+          fontSize: 9,
+          fontFamily: "Inter, sans-serif",
           fontWeight: isHovered ? 600 : 400,
           color: isHovered ? node.color : connected ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.28)",
-          letterSpacing: "0.04em", whiteSpace: "nowrap",
-          transition: "color 0.3s ease", lineHeight: 1,
-        }}>{node.name}</span>
+          letterSpacing: "0.04em",
+          whiteSpace: "nowrap",
+          transition: "color 0.3s ease",
+          lineHeight: 1,
+        }}>
+          {node.name}
+        </span>
 
         <AnimatePresence>
           {isHovered && (
@@ -457,24 +361,38 @@ function NodeIcon({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.94 }}
               transition={{ type: "spring", stiffness: 400, damping: 28 }}
-              style={{ position: "absolute", bottom: "calc(100% + 10px)", left: "50%",
-                transform: "translateX(-50%)", pointerEvents: "none", zIndex: 30, whiteSpace: "nowrap" }}
+              style={{
+                position: "absolute",
+                bottom: "calc(100% + 10px)",
+                left: "50%",
+                transform: "translateX(-50%)",
+                pointerEvents: "none",
+                zIndex: 30,
+                whiteSpace: "nowrap",
+              }}
             >
               <div style={{
-                background: "rgba(8,12,18,0.96)", border: `1px solid ${node.color}50`,
-                borderRadius: 10, padding: "7px 13px", backdropFilter: "blur(14px)",
+                background: "rgba(8,12,18,0.96)",
+                border: `1px solid ${node.color}50`,
+                borderRadius: 10,
+                padding: "7px 13px",
+                backdropFilter: "blur(14px)",
                 boxShadow: `0 6px 28px rgba(0,0,0,0.55), 0 0 14px ${node.color}1A`,
-                maxWidth: 175, textAlign: "center",
+                maxWidth: 175,
+                textAlign: "center",
               }}>
-                <p style={{ margin: 0, fontSize: 10.5, fontWeight: 600, color: node.color,
-                  fontFamily: "Inter, sans-serif", lineHeight: 1.3, marginBottom: 4 }}>{node.name}</p>
-                <p style={{ margin: 0, fontSize: 9, color: "rgba(255,255,255,0.58)",
-                  fontFamily: "Inter, sans-serif", lineHeight: 1.5, whiteSpace: "normal" }}>{node.role}</p>
+                <p style={{ margin: 0, fontSize: 10.5, fontWeight: 600, color: node.color, fontFamily: "Inter, sans-serif", lineHeight: 1.3, marginBottom: 4 }}>
+                  {node.name}
+                </p>
+                <p style={{ margin: 0, fontSize: 9, color: "rgba(255,255,255,0.58)", fontFamily: "Inter, sans-serif", lineHeight: 1.5, whiteSpace: "normal" }}>
+                  {node.role}
+                </p>
               </div>
               <div style={{
                 position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
-                width: 0, height: 0, borderLeft: "5px solid transparent",
-                borderRight: "5px solid transparent", borderTop: `5px solid ${node.color}50`,
+                width: 0, height: 0,
+                borderLeft: "5px solid transparent", borderRight: "5px solid transparent",
+                borderTop: `5px solid ${node.color}50`,
               }} />
             </motion.div>
           )}
