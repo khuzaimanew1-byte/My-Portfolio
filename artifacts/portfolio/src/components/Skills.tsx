@@ -58,7 +58,7 @@ function isConnected(id: string, hov: string | null) {
 const AR = 0.48;
 const svgY = (y: number) => y * AR;
 
-const NODE_RADIUS = 4.2;
+const NODE_RADIUS = 0;
 const SAFE_RADIUS = 9.5;
 
 function cubicBezierPoint(p0: number, p1: number, p2: number, p3: number, t: number): number {
@@ -166,61 +166,30 @@ function Edge({
         <path id={pathRefId} d={d} />
       </defs>
 
-      {/* ── atmospheric outer halo ─────────────────────────────── */}
-      <path
-        d={d}
-        fill="none"
-        stroke={pulseColor}
-        strokeWidth={active ? 3.5 : 1.8}
-        strokeLinecap="round"
-        strokeOpacity={active ? 0.07 : 0.025}
-        filter={`url(#blur-halo-${uid})`}
-        style={{ transition: "stroke-width 0.5s ease, stroke-opacity 0.5s ease" }}
-      />
-
-      {/* ── mid glow ──────────────────────────────────────────── */}
-      <path
-        d={d}
-        fill="none"
-        stroke={pulseColor}
-        strokeWidth={active ? 1.6 : 0.6}
-        strokeLinecap="round"
-        strokeOpacity={active ? 0.22 : 0.045}
-        filter={`url(#blur-glow-${uid})`}
-        style={{ transition: "stroke-width 0.45s ease, stroke-opacity 0.45s ease" }}
-      />
-
-      {/* ── idle breath core (always on, very low opacity) ─────── */}
-      {!active && (
+      {/* ── soft outer glow (active only) ─────────────────────── */}
+      {active && (
         <path
           d={d}
           fill="none"
-          stroke="rgba(120,140,160,0.9)"
-          strokeWidth={0.18}
+          stroke={pulseColor}
+          strokeWidth={1.4}
           strokeLinecap="round"
-          strokeOpacity={1}
-          style={{
-            animation: `idleBreathe-${uid} 3.8s ease-in-out infinite`,
-          }}
+          strokeOpacity={0.08}
+          filter={`url(#blur-halo-${uid})`}
         />
       )}
-      <style>{`
-        @keyframes idleBreathe-${uid} {
-          0%, 100% { opacity: 0.055; }
-          50%       { opacity: 0.14; }
-        }
-      `}</style>
 
-      {/* ── core signal line (active) ──────────────────────────── */}
-      <path
-        d={d}
-        fill="none"
-        stroke={`url(#${gradId})`}
-        strokeWidth={active ? 0.38 : 0}
-        strokeLinecap="round"
-        strokeOpacity={active ? 1 : 0}
-        style={{ transition: "stroke-width 0.4s ease, stroke-opacity 0.4s ease" }}
-      />
+      {/* ── core signal line (active only) ────────────────────── */}
+      {active && (
+        <path
+          d={d}
+          fill="none"
+          stroke={`url(#${gradId})`}
+          strokeWidth={0.35}
+          strokeLinecap="round"
+          strokeOpacity={0.9}
+        />
+      )}
 
       {/* ── energy pulse ──────────────────────────────────────── */}
       {active && (
