@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SiHtml5,
@@ -11,131 +11,238 @@ import {
 } from "react-icons/si";
 import { FileCode2, Palette, Code2 } from "lucide-react";
 
-const skills = [
+/* ── node definitions ──────────────────────────────────────── */
+// positions are in a 1000 × 420 viewBox coordinate space
+const nodes = [
   {
+    id: "html",
     name: "HTML",
     icon: SiHtml5,
     color: "#E34F26",
-    category: "Frontend",
-    description: "Semantic markup, accessibility, structured web content.",
+    x: 80,
+    y: 210,
+    tooltip: "Semantic markup, accessibility, structured web content.",
   },
   {
+    id: "css",
     name: "CSS",
     icon: Palette,
     color: "#1572B6",
-    category: "Frontend",
-    description: "Responsive layouts, animations, modern design systems.",
+    x: 240,
+    y: 90,
+    tooltip: "Responsive layouts, animations, modern design systems.",
     isLucide: true,
   },
   {
+    id: "ejs",
+    name: "EJS",
+    icon: FileCode2,
+    color: "#B9473A",
+    x: 240,
+    y: 330,
+    tooltip: "Embedded JS templating for server-rendered views.",
+    isLucide: true,
+  },
+  {
+    id: "js",
     name: "JavaScript",
     icon: SiJavascript,
     color: "#F7DF1E",
-    category: "Frontend",
-    description: "ES6+, async patterns, DOM interaction, event-driven logic.",
+    x: 420,
+    y: 210,
+    tooltip: "ES6+, async patterns, DOM interaction, event-driven logic.",
   },
   {
+    id: "nodejs",
     name: "Node.js",
     icon: SiNodedotjs,
-    color: "#339933",
-    category: "Backend",
-    description: "Server-side runtime, REST APIs, event loop architecture.",
+    color: "#3C873A",
+    x: 580,
+    y: 80,
+    tooltip: "Server-side runtime, REST APIs, event loop architecture.",
   },
   {
-    name: "Express.js",
-    icon: SiExpress,
-    color: "#ffffff",
-    category: "Backend",
-    description: "Routing, middleware, RESTful API design patterns.",
-  },
-  {
-    name: "MongoDB",
-    icon: SiMongodb,
-    color: "#47A248",
-    category: "Database",
-    description: "Document storage, aggregation pipelines, schema design.",
-  },
-  {
-    name: "EJS",
-    icon: FileCode2,
-    color: "#A9225C",
-    category: "Frontend",
-    description: "Embedded JavaScript templating for server-rendered views.",
-    isLucide: true,
-  },
-  {
+    id: "git",
     name: "Git",
     icon: SiGit,
     color: "#F05032",
-    category: "Tools",
-    description: "Version control, branching workflows, collaborative coding.",
+    x: 580,
+    y: 340,
+    tooltip: "Version control, branching workflows, collaborative coding.",
   },
   {
+    id: "express",
+    name: "Express.js",
+    icon: SiExpress,
+    color: "#cccccc",
+    x: 740,
+    y: 210,
+    tooltip: "Routing, middleware, RESTful API design patterns.",
+  },
+  {
+    id: "mongodb",
+    name: "MongoDB",
+    icon: SiMongodb,
+    color: "#47A248",
+    x: 900,
+    y: 90,
+    tooltip: "Document storage, aggregation pipelines, schema design.",
+  },
+  {
+    id: "vscode",
     name: "VS Code",
     icon: Code2,
     color: "#007ACC",
-    category: "Tools",
-    description: "Primary development environment, extensions, debugging.",
+    x: 900,
+    y: 210,
+    tooltip: "Primary development environment, extensions, debugging.",
     isLucide: true,
   },
   {
-    name: "AI-Assisted Dev",
+    id: "ai",
+    name: "AI Dev",
     icon: SiOpenai,
     color: "#10a37f",
-    category: "Tools",
-    description: "AI tooling for code review, rapid prototyping, productivity.",
+    x: 900,
+    y: 340,
+    tooltip: "AI tooling for code review, rapid prototyping, productivity.",
   },
 ];
 
-const categories = ["All", "Frontend", "Backend", "Database", "Tools"];
-
-const connections: [string, string][] = [
-  ["HTML", "CSS"],
-  ["CSS", "JavaScript"],
-  ["JavaScript", "Node.js"],
-  ["Node.js", "Express.js"],
-  ["Express.js", "MongoDB"],
-  ["JavaScript", "EJS"],
-  ["Node.js", "Git"],
+/* ── connection pairs ──────────────────────────────────────── */
+const edges: [string, string][] = [
+  ["html", "css"],
+  ["html", "ejs"],
+  ["css", "js"],
+  ["ejs", "js"],
+  ["js", "nodejs"],
+  ["js", "git"],
+  ["nodejs", "express"],
+  ["express", "mongodb"],
+  ["express", "vscode"],
+  ["express", "ai"],
 ];
 
+/* ── helpers ───────────────────────────────────────────────── */
+const NODE_R = 28; // icon circle radius in SVG units
+
+function getNode(id: string) {
+  return nodes.find((n) => n.id === id)!;
+}
+
+function isEdgeActive(edgeA: string, edgeB: string, hovered: string | null) {
+  if (!hovered) return false;
+  return edgeA === hovered || edgeB === hovered;
+}
+
+function isConnectedTo(nodeId: string, hovered: string | null) {
+  if (!hovered || hovered === nodeId) return false;
+  return edges.some(
+    ([a, b]) => (a === hovered && b === nodeId) || (b === hovered && a === nodeId)
+  );
+}
+
+/* ── AnimatedEdge ──────────────────────────────────────────── */
+function AnimatedEdge({
+  a,
+  b,
+  active,
+  colorA,
+  colorB,
+}: {
+  a: { x: number; y: number };
+  b: { x: number; y: number };
+  active: boolean;
+  colorA: string;
+  colorB: string;
+}) {
+  const id = `grad-${Math.random().toString(36).slice(2)}`;
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+
+  return (
+    <g>
+      <defs>
+        <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={colorA} stopOpacity={active ? 0.9 : 0.15} />
+          <stop offset="100%" stopColor={colorB} stopOpacity={active ? 0.9 : 0.15} />
+        </linearGradient>
+      </defs>
+
+      {/* base dim line */}
+      <line
+        x1={a.x}
+        y1={a.y}
+        x2={b.x}
+        y2={b.y}
+        stroke={`url(#${id})`}
+        strokeWidth={active ? 1.5 : 1}
+        strokeDasharray={active ? "none" : "4 6"}
+        style={{ transition: "all 0.35s ease" }}
+      />
+
+      {/* animated travelling dot when active */}
+      {active && (
+        <circle r={3} fill={colorA} opacity={0.9}>
+          <animateMotion
+            dur="1.6s"
+            repeatCount="indefinite"
+            path={`M${a.x},${a.y} L${b.x},${b.y}`}
+          />
+        </circle>
+      )}
+
+      {/* glow overlay when active */}
+      {active && (
+        <line
+          x1={a.x}
+          y1={a.y}
+          x2={b.x}
+          y2={b.y}
+          stroke={`url(#${id})`}
+          strokeWidth={4}
+          strokeOpacity={0.18}
+          filter="blur(3px)"
+        />
+      )}
+    </g>
+  );
+}
+
+/* ── main component ────────────────────────────────────────── */
 export function Skills() {
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
-  const filtered =
-    activeCategory === "All"
-      ? skills
-      : skills.filter((s) => s.category === activeCategory);
-
-  const isConnected = (skillName: string) => {
-    if (!hoveredSkill) return false;
-    return connections.some(
-      ([a, b]) =>
-        (a === hoveredSkill && b === skillName) ||
-        (b === hoveredSkill && a === skillName)
-    );
-  };
+  // reset tooltip on outside click
+  useEffect(() => {
+    const handler = () => setHovered(null);
+    window.addEventListener("blur", handler);
+    return () => window.removeEventListener("blur", handler);
+  }, []);
 
   return (
     <section className="py-24 relative overflow-hidden">
-      {/* Subtle grid background */}
+      {/* subtle dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.04]"
         style={{
-          backgroundImage:
-            "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
+          backgroundImage: "radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
         }}
       />
 
       <div className="container mx-auto px-6 relative z-10">
-        {/* Header */}
+        {/* header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-2xl mx-auto mb-12"
+          className="text-center max-w-2xl mx-auto mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             Technical Arsenal
@@ -145,160 +252,220 @@ export function Skills() {
           </p>
         </motion.div>
 
-        {/* Category filter */}
-        <div className="flex justify-center gap-2 flex-wrap mb-12">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              data-testid={`filter-${cat.toLowerCase()}`}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
-                activeCategory === cat
-                  ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25"
-                  : "bg-transparent border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {/* node graph */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative max-w-5xl mx-auto"
+        >
+          <svg
+            ref={svgRef}
+            viewBox="20 40 960 370"
+            className="w-full"
+            style={{ overflow: "visible" }}
+            onMouseLeave={() => {
+              setHovered(null);
+              setTooltip(null);
+            }}
+          >
+            {/* edges */}
+            {edges.map(([aId, bId]) => {
+              const a = getNode(aId);
+              const b = getNode(bId);
+              const active = isEdgeActive(aId, bId, hovered);
+              return (
+                <AnimatedEdge
+                  key={`${aId}-${bId}`}
+                  a={{ x: a.x, y: a.y }}
+                  b={{ x: b.x, y: b.y }}
+                  active={active}
+                  colorA={a.color}
+                  colorB={b.color}
+                />
+              );
+            })}
 
-        {/* Skill cards grid */}
-        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((skill, index) => {
-              const Icon = skill.icon;
-              const connected = isConnected(skill.name);
-              const dimmed =
-                hoveredSkill &&
-                hoveredSkill !== skill.name &&
-                !connected;
+            {/* nodes */}
+            {nodes.map((node, i) => {
+              const Icon = node.icon;
+              const isHovered = hovered === node.id;
+              const connected = isConnectedTo(node.id, hovered);
+              const dimmed = hovered && !isHovered && !connected;
+              const showColor = isHovered || connected;
 
               return (
-                <motion.div
-                  key={skill.name}
-                  layout
-                  initial={{ opacity: 0, scale: 0.8 }}
+                <motion.g
+                  key={node.id}
+                  initial={{ opacity: 0, scale: 0 }}
                   animate={{
-                    opacity: dimmed ? 0.3 : 1,
-                    scale: 1,
+                    opacity: dimmed ? 0.2 : 1,
+                    scale: isHovered ? 1.18 : 1,
                   }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.25, delay: index * 0.04 }}
-                  whileHover={{ scale: 1.08, y: -6 }}
-                  onHoverStart={() => setHoveredSkill(skill.name)}
-                  onHoverEnd={() => setHoveredSkill(null)}
-                  data-testid={`skill-${skill.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
-                  className="relative group flex flex-col items-center gap-3 p-5 rounded-2xl bg-card border border-border cursor-default select-none"
-                  style={{
-                    boxShadow:
-                      hoveredSkill === skill.name
-                        ? `0 0 24px 4px ${skill.color}30, 0 4px 16px rgba(0,0,0,0.4)`
-                        : connected
-                        ? `0 0 14px 2px ${skill.color}20`
-                        : undefined,
-                    borderColor:
-                      hoveredSkill === skill.name
-                        ? `${skill.color}60`
-                        : connected
-                        ? `${skill.color}30`
-                        : undefined,
-                    transition:
-                      "box-shadow 0.3s ease, border-color 0.3s ease, opacity 0.25s ease",
+                  whileInView={{ opacity: dimmed ? 0.2 : 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
+                  style={{ transformOrigin: `${node.x}px ${node.y}px`, cursor: "default" }}
+                  onMouseEnter={() => {
+                    setHovered(node.id);
+                    setTooltip({ id: node.id, x: node.x, y: node.y });
+                  }}
+                  onMouseLeave={() => {
+                    setHovered(null);
+                    setTooltip(null);
                   }}
                 >
-                  {/* Connected indicator */}
-                  {connected && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-primary"
-                      style={{ boxShadow: "0 0 8px hsl(var(--primary))" }}
+                  {/* outer glow ring when hovered */}
+                  {isHovered && (
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={NODE_R + 14}
+                      fill="none"
+                      stroke={node.color}
+                      strokeWidth={1}
+                      strokeOpacity={0.3}
+                      style={{
+                        filter: `drop-shadow(0 0 8px ${node.color})`,
+                      }}
                     />
                   )}
 
-                  {/* Icon */}
-                  <div
-                    className="w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300"
-                    style={{
-                      background:
-                        hoveredSkill === skill.name
-                          ? `${skill.color}18`
-                          : "transparent",
-                    }}
+                  {/* inner ring for connected */}
+                  {connected && (
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={NODE_R + 8}
+                      fill="none"
+                      stroke={node.color}
+                      strokeWidth={0.8}
+                      strokeOpacity={0.4}
+                    />
+                  )}
+
+                  {/* icon background circle */}
+                  <circle
+                    cx={node.x}
+                    cy={node.y}
+                    r={NODE_R}
+                    fill={isHovered ? `${node.color}18` : "rgba(255,255,255,0.03)"}
+                    stroke={
+                      isHovered
+                        ? node.color
+                        : connected
+                        ? `${node.color}60`
+                        : "rgba(255,255,255,0.1)"
+                    }
+                    strokeWidth={isHovered ? 1.5 : 1}
+                    style={{ transition: "all 0.3s ease" }}
+                  />
+
+                  {/* icon (via foreignObject) */}
+                  <foreignObject
+                    x={node.x - 16}
+                    y={node.y - 16}
+                    width={32}
+                    height={32}
+                    style={{ overflow: "visible" }}
                   >
-                    {skill.isLucide ? (
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        pointerEvents: "none",
+                      }}
+                    >
                       <Icon
-                        size={28}
+                        size={22}
                         style={{
-                          color:
-                            hoveredSkill === skill.name
-                              ? skill.color
-                              : "hsl(var(--muted-foreground))",
+                          color: showColor
+                            ? node.color
+                            : "rgba(255,255,255,0.55)",
                           transition: "color 0.3s ease",
+                          filter: isHovered
+                            ? `drop-shadow(0 0 6px ${node.color})`
+                            : "none",
                         }}
                       />
-                    ) : (
-                      <Icon
-                        size={28}
-                        style={{
-                          color:
-                            hoveredSkill === skill.name
-                              ? skill.color
-                              : "hsl(var(--muted-foreground))",
-                          transition: "color 0.3s ease",
-                        }}
-                      />
-                    )}
-                  </div>
+                    </div>
+                  </foreignObject>
 
-                  {/* Name */}
-                  <span className="text-sm font-medium text-foreground text-center leading-tight">
-                    {skill.name}
-                  </span>
-
-                  {/* Category badge */}
-                  <span className="text-[10px] text-muted-foreground font-mono tracking-wide">
-                    {skill.category}
-                  </span>
-
-                  {/* Hover tooltip description */}
-                  <AnimatePresence>
-                    {hoveredSkill === skill.name && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                        transition={{ duration: 0.18 }}
-                        className="absolute -bottom-2 left-1/2 -translate-x-1/2 translate-y-full z-20 w-52 pointer-events-none"
-                      >
-                        <div className="mt-2 bg-card border border-border rounded-xl px-3 py-2.5 shadow-xl text-center">
-                          <p className="text-xs text-muted-foreground leading-snug">
-                            {skill.description}
-                          </p>
-                        </div>
-                        <div
-                          className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-l border-t border-border rotate-45"
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                  {/* label below node */}
+                  <text
+                    x={node.x}
+                    y={node.y + NODE_R + 16}
+                    textAnchor="middle"
+                    fontSize={10.5}
+                    fontFamily="Inter, sans-serif"
+                    fontWeight={isHovered ? 600 : 400}
+                    fill={
+                      isHovered
+                        ? node.color
+                        : connected
+                        ? "rgba(255,255,255,0.8)"
+                        : "rgba(255,255,255,0.4)"
+                    }
+                    style={{ transition: "fill 0.3s ease", userSelect: "none" }}
+                  >
+                    {node.name}
+                  </text>
+                </motion.g>
               );
             })}
-          </AnimatePresence>
-        </div>
 
-        {/* Connection legend */}
-        {hoveredSkill && (
-          <motion.p
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center text-xs text-muted-foreground mt-10 font-mono"
-          >
-            Related technologies highlighted
-          </motion.p>
-        )}
+            {/* tooltip rendered in SVG space */}
+            <AnimatePresence>
+              {tooltip && hovered && (() => {
+                const node = getNode(hovered);
+                const above = node.y > 220;
+                const ty = above ? node.y - NODE_R - 48 : node.y + NODE_R + 34;
+                const tw = 160;
+                const tx = Math.max(20, Math.min(node.x - tw / 2, 820));
+                return (
+                  <motion.g
+                    key={hovered + "-tooltip"}
+                    initial={{ opacity: 0, y: above ? 4 : -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.16 }}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <rect
+                      x={tx}
+                      y={ty}
+                      width={tw}
+                      height={38}
+                      rx={8}
+                      fill="rgba(15,20,25,0.92)"
+                      stroke={node.color}
+                      strokeWidth={0.8}
+                      strokeOpacity={0.5}
+                    />
+                    <foreignObject x={tx + 8} y={ty + 4} width={tw - 16} height={32}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 9.5,
+                          lineHeight: 1.4,
+                          color: "rgba(255,255,255,0.72)",
+                          fontFamily: "Inter, sans-serif",
+                          textAlign: "center",
+                        }}
+                      >
+                        {node.tooltip}
+                      </p>
+                    </foreignObject>
+                  </motion.g>
+                );
+              })()}
+            </AnimatePresence>
+          </svg>
+        </motion.div>
       </div>
     </section>
   );
