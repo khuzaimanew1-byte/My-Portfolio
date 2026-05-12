@@ -1,0 +1,80 @@
+Deeply analyze the current line styling and spatial routing system.
+
+Current problems:
+
+* lines visually overlap icons
+* curves feel flat
+* paths cut through composition awkwardly
+* line glow feels generic
+* network lacks spatial intelligence
+
+Rebuild the line rendering and routing system.
+
+IMPORTANT:
+Lines must NEVER visually cross through icons.
+
+Routing rules:
+
+* every connection path must intelligently avoid node overlap
+* add dynamic path offsetting
+* calculate bezier control points based on surrounding icon positions
+* maintain safe spacing around every node
+* preserve clean visual breathing room
+
+Connection curves should:
+
+* wrap naturally around composition
+* feel spatially aware
+* create elegant flow arcs
+* avoid harsh direction changes
+* avoid messy intersections
+
+Line styling upgrade:
+
+* ultra-clean cinematic stroke rendering
+* subtle inner core + soft outer glow
+* layered opacity gradients
+* premium atmospheric depth
+* smooth edge rendering
+* restrained brightness
+
+Line structure:
+
+* center signal core
+* soft fading atmospheric halo
+* slight width tapering near endpoints
+* line intensity strongest near active pulse
+* distant parts fade naturally
+
+Visual behavior:
+
+* active transmission slightly thickens line temporarily
+* inactive lines remain extremely subtle
+* lines softly breathe at low opacity while idle
+* no static dead appearance
+
+Depth system:
+
+* some lines appear slightly behind icons
+* some lines subtly emerge forward
+* depth layering must feel intentional
+* preserve readability at all times
+
+Interaction quality:
+
+* hovered node creates cleaner prioritized routes
+* nearby connections reorganize smoothly
+* curves adapt live without snapping
+* routing transitions use interpolation
+
+Avoid:
+
+* tangled webs
+* sharp corners
+* overlapping nodes
+* thick neon tubes
+* random line crossings
+* aggressive glow spam
+
+Final result should feel like:
+an elegant cinematic intelligence network with beautifully routed flowing signal paths that move naturally through space without disturbing the icon composition.

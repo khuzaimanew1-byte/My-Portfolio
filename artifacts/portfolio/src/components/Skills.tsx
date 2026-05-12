@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, useSpring, useTransform, AnimatePresence } from "framer-motion";
 import {
   SiHtml5,
@@ -10,9 +10,8 @@ import {
   SiOpenai,
   SiCss,
 } from "react-icons/si";
-import { FileCode2, Code2 } from "lucide-react";
+import { FileCode2 } from "lucide-react";
 
-/* ── Official inline SVG for VS Code (Simple Icons path) ──── */
 function VSCodeIcon({ size, style }: { size: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style} xmlns="http://www.w3.org/2000/svg">
@@ -24,72 +23,30 @@ function VSCodeIcon({ size, style }: { size: number; style?: React.CSSProperties
   );
 }
 
-/* ── node definitions  (x,y = % of container 0–100) ─────── */
 const nodes = [
-  {
-    id: "html",    name: "HTML",        icon: SiHtml5,      color: "#E34F26",
-    role: "Semantic structure & accessible markup",
-    x: 9,  y: 50, floatY: [-6, 4],  dur: 4.4,
-  },
-  {
-    id: "css",     name: "CSS3",        icon: SiCss,        color: "#264DE4",
-    role: "Responsive layouts, animations & design systems",
-    x: 22, y: 16, floatY: [-5, 7],  dur: 5.1,
-  },
-  {
-    id: "ejs",     name: "EJS",         icon: FileCode2,    color: "#B9473A",
-    role: "Server-side JS templating for dynamic views",
-    x: 22, y: 79, floatY: [-7, 4],  dur: 4.7, isLucide: true,
-  },
-  {
-    id: "js",      name: "JavaScript",  icon: SiJavascript, color: "#F0DB4F",
-    role: "ES6+, async logic, event-driven interaction",
-    x: 43, y: 48, floatY: [-5, 6],  dur: 3.9,
-  },
-  {
-    id: "nodejs",  name: "Node.js",     icon: SiNodedotjs,  color: "#3C873A",
-    role: "Server runtime, REST APIs, event loop",
-    x: 60, y: 15, floatY: [-8, 3],  dur: 4.6,
-  },
-  {
-    id: "git",     name: "Git",         icon: SiGit,        color: "#F05032",
-    role: "Version control, branching, collaborative code",
-    x: 60, y: 77, floatY: [-4, 8],  dur: 5.3,
-  },
-  {
-    id: "express", name: "Express.js",  icon: SiExpress,    color: "#c0c0c0",
-    role: "Routing, middleware, RESTful API patterns",
-    x: 76, y: 46, floatY: [-5, 5],  dur: 4.2,
-  },
-  {
-    id: "mongodb", name: "MongoDB",     icon: SiMongodb,    color: "#47A248",
-    role: "Document storage, aggregation, schema design",
-    x: 91, y: 17, floatY: [-6, 6],  dur: 3.8,
-  },
-  {
-    id: "vscode",  name: "VS Code",     icon: VSCodeIcon,   color: "#007ACC",
-    role: "Primary IDE — extensions, debugging, workflow",
-    x: 91, y: 52, floatY: [-5, 7],  dur: 5.0, isCustom: true,
-  },
-  {
-    id: "ai",      name: "AI Dev",      icon: SiOpenai,     color: "#10a37f",
-    role: "AI-assisted code review, rapid prototyping",
-    x: 91, y: 81, floatY: [-7, 4],  dur: 4.3,
-  },
+  { id: "html",    name: "HTML",        icon: SiHtml5,      color: "#E34F26", role: "Semantic structure & accessible markup",               x: 9,  y: 50, floatY: [-6, 4],  dur: 4.4 },
+  { id: "css",     name: "CSS3",        icon: SiCss,        color: "#264DE4", role: "Responsive layouts, animations & design systems",      x: 22, y: 16, floatY: [-5, 7],  dur: 5.1 },
+  { id: "ejs",     name: "EJS",         icon: FileCode2,    color: "#B9473A", role: "Server-side JS templating for dynamic views",          x: 22, y: 79, floatY: [-7, 4],  dur: 4.7, isLucide: true },
+  { id: "js",      name: "JavaScript",  icon: SiJavascript, color: "#F0DB4F", role: "ES6+, async logic, event-driven interaction",          x: 43, y: 48, floatY: [-5, 6],  dur: 3.9 },
+  { id: "nodejs",  name: "Node.js",     icon: SiNodedotjs,  color: "#3C873A", role: "Server runtime, REST APIs, event loop",               x: 60, y: 15, floatY: [-8, 3],  dur: 4.6 },
+  { id: "git",     name: "Git",         icon: SiGit,        color: "#F05032", role: "Version control, branching, collaborative code",       x: 60, y: 77, floatY: [-4, 8],  dur: 5.3 },
+  { id: "express", name: "Express.js",  icon: SiExpress,    color: "#c0c0c0", role: "Routing, middleware, RESTful API patterns",            x: 76, y: 46, floatY: [-5, 5],  dur: 4.2 },
+  { id: "mongodb", name: "MongoDB",     icon: SiMongodb,    color: "#47A248", role: "Document storage, aggregation, schema design",         x: 91, y: 17, floatY: [-6, 6],  dur: 3.8 },
+  { id: "vscode",  name: "VS Code",     icon: VSCodeIcon,   color: "#007ACC", role: "Primary IDE — extensions, debugging, workflow",        x: 91, y: 52, floatY: [-5, 7],  dur: 5.0, isCustom: true },
+  { id: "ai",      name: "AI Dev",      icon: SiOpenai,     color: "#10a37f", role: "AI-assisted code review, rapid prototyping",          x: 91, y: 81, floatY: [-7, 4],  dur: 4.3 },
 ];
 
-/* ── edges ──────────────────────────────────────────────── */
-const edges: { a: string; b: string; bend: number }[] = [
-  { a: "html",    b: "css",     bend:  0.14 },
-  { a: "html",    b: "ejs",     bend: -0.14 },
-  { a: "css",     b: "js",      bend:  0.11 },
-  { a: "ejs",     b: "js",      bend: -0.11 },
-  { a: "js",      b: "nodejs",  bend:  0.13 },
-  { a: "js",      b: "git",     bend: -0.13 },
-  { a: "nodejs",  b: "express", bend:  0.10 },
-  { a: "express", b: "mongodb", bend:  0.12 },
-  { a: "express", b: "vscode",  bend: -0.08 },
-  { a: "express", b: "ai",      bend: -0.12 },
+const edges: { a: string; b: string; bend: number; depth?: "back" | "front" }[] = [
+  { a: "html",    b: "css",     bend:  0.18,  depth: "back"  },
+  { a: "html",    b: "ejs",     bend: -0.18,  depth: "back"  },
+  { a: "css",     b: "js",      bend:  0.14,  depth: "front" },
+  { a: "ejs",     b: "js",      bend: -0.14,  depth: "front" },
+  { a: "js",      b: "nodejs",  bend:  0.16,  depth: "front" },
+  { a: "js",      b: "git",     bend: -0.16,  depth: "front" },
+  { a: "nodejs",  b: "express", bend:  0.13,  depth: "back"  },
+  { a: "express", b: "mongodb", bend:  0.15,  depth: "front" },
+  { a: "express", b: "vscode",  bend: -0.06,  depth: "front" },
+  { a: "express", b: "ai",      bend: -0.15,  depth: "back"  },
 ];
 
 function getNode(id: string) { return nodes.find((n) => n.id === id)!; }
@@ -98,74 +55,184 @@ function isConnected(id: string, hov: string | null) {
   return edges.some(({ a, b }) => (a === hov && b === id) || (b === hov && a === id));
 }
 
-/* ── viewBox: "0 0 100 48" matches paddingBottom:48% container
-      svgY = cssY * 0.48 ─────────────────────────────────── */
 const AR = 0.48;
-const svgY = (y: number) => +(y * AR).toFixed(3);
+const svgY = (y: number) => y * AR;
 
-function bezierPath(
-  x1: number, y1: number, x2: number, y2: number, bend: number
-) {
-  const dx = x2 - x1, dy = y2 - y1;
-  const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const px = -dy / len, py = dx / len;
-  const off = len * bend;
-  const cp1x = (x1 + dx * 0.35 + px * off).toFixed(3);
-  const cp1y = (y1 + dy * 0.35 + py * off).toFixed(3);
-  const cp2x = (x2 - dx * 0.35 + px * off).toFixed(3);
-  const cp2y = (y2 - dy * 0.35 + py * off).toFixed(3);
-  return `M${x1},${y1} C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+const NODE_RADIUS = 4.2;
+const SAFE_RADIUS = 9.5;
+
+function cubicBezierPoint(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const mt = 1 - t;
+  return mt * mt * mt * p0 + 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t * p3;
 }
 
-/* ── Edge component ──────────────────────────────────────── */
+function smartBezierPath(
+  x1: number, y1: number,
+  x2: number, y2: number,
+  baseBend: number,
+  allNodePositions: Array<{ x: number; y: number; id: string }>,
+  skipIds: string[]
+): string {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+
+  const sx = x1 + (dx / len) * NODE_RADIUS;
+  const sy = y1 + (dy / len) * NODE_RADIUS;
+  const ex = x2 - (dx / len) * NODE_RADIUS;
+  const ey = y2 - (dy / len) * NODE_RADIUS;
+
+  const edx = ex - sx, edy = ey - sy;
+  const elen = Math.sqrt(edx * edx + edy * edy) || 1;
+  const px = -edy / elen, py = edx / elen;
+  const off = elen * baseBend;
+
+  let cp1x = sx + edx * 0.33 + px * off;
+  let cp1y = sy + edy * 0.33 + py * off;
+  let cp2x = ex - edx * 0.33 + px * off;
+  let cp2y = ey - edy * 0.33 + py * off;
+
+  for (let iter = 0; iter < 3; iter++) {
+    for (const node of allNodePositions) {
+      if (skipIds.includes(node.id)) continue;
+      let totalRX = 0, totalRY = 0, pushed = false;
+
+      for (let t = 0.12; t <= 0.88; t += 0.19) {
+        const pathX = cubicBezierPoint(sx, cp1x, cp2x, ex, t);
+        const pathY = cubicBezierPoint(sy, cp1y, cp2y, ey, t);
+        const ddx = pathX - node.x, ddy = pathY - node.y;
+        const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+
+        if (dist < SAFE_RADIUS && dist > 0.01) {
+          const strength = Math.pow((SAFE_RADIUS - dist) / SAFE_RADIUS, 1.4) * 8;
+          totalRX += (ddx / dist) * strength;
+          totalRY += (ddy / dist) * strength;
+          pushed = true;
+        }
+      }
+
+      if (pushed) {
+        cp1x += totalRX * 0.45;
+        cp1y += totalRY * 0.45;
+        cp2x += totalRX * 0.45;
+        cp2y += totalRY * 0.45;
+      }
+    }
+  }
+
+  return `M${sx.toFixed(3)},${sy.toFixed(3)} C${cp1x.toFixed(3)},${cp1y.toFixed(3)} ${cp2x.toFixed(3)},${cp2y.toFixed(3)} ${ex.toFixed(3)},${ey.toFixed(3)}`;
+}
+
 let egCounter = 0;
+
 function Edge({
-  edge, active, activeColor,
-}: { edge: { a: string; b: string; bend: number }; active: boolean; activeColor: string }) {
+  edge,
+  active,
+  activeColor,
+  allNodePositions,
+}: {
+  edge: { a: string; b: string; bend: number; depth?: "back" | "front" };
+  active: boolean;
+  activeColor: string;
+  allNodePositions: Array<{ x: number; y: number; id: string }>;
+}) {
   const na = getNode(edge.a), nb = getNode(edge.b);
   const ax = na.x, ay = svgY(na.y);
   const bx = nb.x, by = svgY(nb.y);
-  const d = bezierPath(ax, ay, bx, by, edge.bend);
+
+  const d = useMemo(() => smartBezierPath(
+    ax, ay, bx, by, edge.bend, allNodePositions, [edge.a, edge.b]
+  ), [ax, ay, bx, by, edge.bend, allNodePositions, edge.a, edge.b]);
+
   const [uid] = useState(() => `eg-${egCounter++}`);
+  const gradId = `grad-${uid}`;
+  const pathRefId = `path-ref-${uid}`;
+
+  const pulseColor = activeColor;
 
   return (
     <g>
       <defs>
-        <linearGradient id={uid} gradientUnits="userSpaceOnUse" x1={ax} y1={ay} x2={bx} y2={by}>
-          <stop offset="0%"   stopColor={activeColor} />
-          <stop offset="100%" stopColor={activeColor} stopOpacity={0.35} />
+        <linearGradient id={gradId} gradientUnits="userSpaceOnUse" x1={ax} y1={ay} x2={bx} y2={by}>
+          <stop offset="0%"   stopColor={pulseColor} stopOpacity={active ? 0.92 : 0} />
+          <stop offset="45%"  stopColor={pulseColor} stopOpacity={active ? 1    : 0} />
+          <stop offset="100%" stopColor={pulseColor} stopOpacity={active ? 0.38 : 0} />
         </linearGradient>
+        <filter id={`blur-halo-${uid}`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.8" />
+        </filter>
+        <filter id={`blur-glow-${uid}`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.6" />
+        </filter>
+        <path id={pathRefId} d={d} />
       </defs>
 
-      {/* main line */}
-      <path d={d} fill="none"
-        stroke={active ? `url(#${uid})` : "transparent"}
-        strokeWidth={0.3}
+      {/* ── atmospheric outer halo ─────────────────────────────── */}
+      <path
+        d={d}
+        fill="none"
+        stroke={pulseColor}
+        strokeWidth={active ? 3.5 : 1.8}
         strokeLinecap="round"
-        pathLength={1}
-        strokeDasharray={1}
-        strokeDashoffset={active ? 0 : 1}
-        style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1), stroke 0.2s" }}
-      />
-      {/* glow */}
-      <path d={d} fill="none"
-        stroke={active ? activeColor : "transparent"}
-        strokeWidth={1.4}
-        strokeLinecap="round"
-        pathLength={1}
-        strokeDasharray={1}
-        strokeDashoffset={active ? 0 : 1}
-        strokeOpacity={0.10}
-        style={{ filter: "blur(1.5px)", transition: "stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1), stroke 0.2s" }}
+        strokeOpacity={active ? 0.07 : 0.025}
+        filter={`url(#blur-halo-${uid})`}
+        style={{ transition: "stroke-width 0.5s ease, stroke-opacity 0.5s ease" }}
       />
 
-      {/* energy pulse */}
+      {/* ── mid glow ──────────────────────────────────────────── */}
+      <path
+        d={d}
+        fill="none"
+        stroke={pulseColor}
+        strokeWidth={active ? 1.6 : 0.6}
+        strokeLinecap="round"
+        strokeOpacity={active ? 0.22 : 0.045}
+        filter={`url(#blur-glow-${uid})`}
+        style={{ transition: "stroke-width 0.45s ease, stroke-opacity 0.45s ease" }}
+      />
+
+      {/* ── idle breath core (always on, very low opacity) ─────── */}
+      {!active && (
+        <path
+          d={d}
+          fill="none"
+          stroke="rgba(120,140,160,0.9)"
+          strokeWidth={0.18}
+          strokeLinecap="round"
+          strokeOpacity={1}
+          style={{
+            animation: `idleBreathe-${uid} 3.8s ease-in-out infinite`,
+          }}
+        />
+      )}
+      <style>{`
+        @keyframes idleBreathe-${uid} {
+          0%, 100% { opacity: 0.055; }
+          50%       { opacity: 0.14; }
+        }
+      `}</style>
+
+      {/* ── core signal line (active) ──────────────────────────── */}
+      <path
+        d={d}
+        fill="none"
+        stroke={`url(#${gradId})`}
+        strokeWidth={active ? 0.38 : 0}
+        strokeLinecap="round"
+        strokeOpacity={active ? 1 : 0}
+        style={{ transition: "stroke-width 0.4s ease, stroke-opacity 0.4s ease" }}
+      />
+
+      {/* ── energy pulse ──────────────────────────────────────── */}
       {active && (
         <>
-          <path id={`path-${uid}`} d={d} fill="none" stroke="none" />
-          <circle r={0.8} fill={activeColor} opacity={0.85}>
-            <animateMotion dur="1.1s" repeatCount="indefinite" begin="0s">
-              <mpath href={`#path-${uid}`} />
+          <circle r={0.55} fill={pulseColor} opacity={0.9}>
+            <animateMotion dur="1.4s" repeatCount="indefinite" begin="0s">
+              <mpath href={`#${pathRefId}`} />
+            </animateMotion>
+          </circle>
+          <circle r={1.1} fill={pulseColor} opacity={0.18} filter={`url(#blur-glow-${uid})`}>
+            <animateMotion dur="1.4s" repeatCount="indefinite" begin="0s">
+              <mpath href={`#${pathRefId}`} />
             </animateMotion>
           </circle>
         </>
@@ -174,7 +241,6 @@ function Edge({
   );
 }
 
-/* ── main ────────────────────────────────────────────────── */
 export function Skills() {
   const [hovered, setHovered] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -184,15 +250,24 @@ export function Skills() {
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const r = containerRef.current!.getBoundingClientRect();
     springX.set(((e.clientX - r.left) / r.width) * 100);
-    springY.set(((e.clientY - r.top)  / r.height) * 100);
+    springY.set(((e.clientY - r.top) / r.height) * 100);
   }, [springX, springY]);
 
   const hNode = hovered ? getNode(hovered) : null;
   const activeColor = hNode?.color ?? "#2dd4bf";
 
+  const allNodePositions = useMemo(() =>
+    nodes.map(n => ({ id: n.id, x: n.x, y: svgY(n.y) })),
+    []
+  );
+
+  const backEdges  = edges.filter(e => e.depth === "back");
+  const frontEdges = edges.filter(e => e.depth !== "back");
+
   return (
     <section className="py-28 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none"
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(5,10,16,0.55) 100%)" }}
       />
 
@@ -220,24 +295,25 @@ export function Skills() {
           onMouseMove={onMouseMove}
           onMouseLeave={() => { setHovered(null); springX.set(50); springY.set(50); }}
         >
-          {/* SVG overlay — viewBox matches 100:48 aspect ratio */}
+          {/* ── Back-depth SVG (behind icons) ──────────────────── */}
           <svg
             viewBox={`0 0 100 ${100 * AR}`}
             preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: "none", overflow: "visible" }}
+            style={{ pointerEvents: "none", overflow: "visible", zIndex: 1 }}
           >
-            {edges.map((edge) => (
+            {backEdges.map((edge) => (
               <Edge
-                key={`${edge.a}-${edge.b}`}
+                key={`back-${edge.a}-${edge.b}`}
                 edge={edge}
                 active={hovered === edge.a || hovered === edge.b}
                 activeColor={activeColor}
+                allNodePositions={allNodePositions}
               />
             ))}
           </svg>
 
-          {/* nodes */}
+          {/* ── Nodes (z:10) ────────────────────────────────────── */}
           {nodes.map((node, i) => {
             const Icon = node.icon as React.ElementType;
             const isHov     = hovered === node.id;
@@ -268,13 +344,30 @@ export function Skills() {
               </NodeIcon>
             );
           })}
+
+          {/* ── Front-depth SVG (also behind divs but drawn last in SVG stack) */}
+          <svg
+            viewBox={`0 0 100 ${100 * AR}`}
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full"
+            style={{ pointerEvents: "none", overflow: "visible", zIndex: 2 }}
+          >
+            {frontEdges.map((edge) => (
+              <Edge
+                key={`front-${edge.a}-${edge.b}`}
+                edge={edge}
+                active={hovered === edge.a || hovered === edge.b}
+                activeColor={activeColor}
+                allNodePositions={allNodePositions}
+              />
+            ))}
+          </svg>
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* ── NodeIcon ───────────────────────────────────────────── */
 function NodeIcon({
   node, index, isHovered, connected, dimmed,
   springMouseX, springMouseY, onEnter, onLeave, children,
@@ -309,7 +402,7 @@ function NodeIcon({
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.07, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-      animate={{ opacity: dimmed ? 0.15 : 1 }}
+      animate={{ opacity: dimmed ? 0.12 : 1 }}
       style={{
         position: "absolute",
         left: `${node.x}%`,
