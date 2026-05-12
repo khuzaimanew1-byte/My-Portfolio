@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "53hsDXIQj3hv6r8KU0pU5"
+uri = "file://artifacts/portfolio/src/assets/nexus-pos-1.png"
+type = "image"
+title = "Dark UI Point of Sale screen"
+
+[[generated]]
+id = "ATnUkeATckBDmCymaMezn"
+uri = "file://artifacts/portfolio/src/assets/nexus-pos-2.png"
+type = "image"
+title = "Dark UI Analytics Dashboard"
+
+[[generated]]
+id = "IpLeKu3oRgOnTjvdPk8DQ"
+uri = "file://artifacts/portfolio/src/assets/nexus-pos-3.png"
+type = "image"
+title = "Dark UI Settings Screen"
+
+[[generated]]
+id = "92p4ummqx69VQ9vXQ4wEE"
+uri = "file://artifacts/portfolio/src/assets/nexus-pos-4.png"
+type = "image"
+title = "Dark UI Keyboard Shortcuts"

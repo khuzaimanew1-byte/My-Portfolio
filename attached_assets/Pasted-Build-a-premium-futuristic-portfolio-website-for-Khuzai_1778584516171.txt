@@ -1,0 +1,225 @@
+Build a premium futuristic portfolio website for “Khuzaima Asif”.
+
+Tech Stack:
+- Next.js
+- Tailwind CSS
+- Framer Motion
+- GSAP
+- Lenis Smooth Scroll
+- Shadcn UI
+
+FILES PROVIDED:
+1. Resume data file
+2. Project context file
+   - contains project details
+   - contains project screenshots/images
+3. Profile images
+   - remove background image
+   - normal image
+
+RULES:
+- extract all content intelligently from uploaded files
+- use uploaded project screenshots in project showcase
+- use remove background profile image in hero section
+- do NOT use placeholder text
+- do NOT create fake projects or fake experience
+- keep content concise and professional
+- website should feel recruiter-focused and premium
+
+━━━━━━━━━━━━━━━━━━
+STYLE & EXPERIENCE
+━━━━━━━━━━━━━━━━━━
+
+Portfolio style:
+- Apple-level
+- futuristic
+- cinematic
+- highly polished
+- visually engaging
+- premium
+- interactive
+- clean and professional
+
+Inspired by:
+- Apple product pages
+- premium SaaS websites
+- advanced interactive portfolios
+
+Design:
+- dark graphite/black base
+- teal/blue accent colors
+- cinematic spacing
+- strong typography
+- subtle gradients
+- premium shadows
+- dark/light mode
+
+━━━━━━━━━━━━━━━━━━
+CONTENT STYLE
+━━━━━━━━━━━━━━━━━━
+
+Write naturally like talking to recruiters and clients.
+
+Examples:
+- “Hi, I’m Khuzaima.”
+- “I build scalable digital systems.”
+- “I focus on structure, clarity, and usability.”
+
+Tone:
+- human
+- modern
+- intelligent
+- concise
+- confident
+- professional
+
+Avoid:
+- robotic AI wording
+- long paragraphs
+- fake corporate text
+
+━━━━━━━━━━━━━━━━━━
+ANIMATIONS & VISUALS
+━━━━━━━━━━━━━━━━━━
+
+Use:
+- cinematic scroll animations
+- smooth section transitions
+- premium hover effects
+- magnetic buttons
+- cursor reactive glow
+- subtle parallax
+- animated backgrounds
+- moving gradients
+- soft particles
+- interactive cards
+- elegant text reveal animations
+- premium loading sequence
+- mouse reactive background effects
+
+Effects should feel:
+- smooth
+- premium
+- controlled
+- performance optimized
+
+Avoid:
+- chaotic motion
+- excessive effects
+- neon overload
+
+━━━━━━━━━━━━━━━━━━
+SECTIONS
+━━━━━━━━━━━━━━━━━━
+
+1. HERO SECTION
+- fullscreen cinematic layout
+- use remove background profile image
+- premium headline
+- short impactful text
+- CTA buttons
+- interactive background
+- smooth intro animation
+- scroll indicator
+
+2. ABOUT SECTION
+Focus on:
+- system thinking
+- logic-driven development
+- optimization mindset
+- scalable systems
+- UX clarity
+- design-first workflow
+
+3. SKILLS SECTION
+Skills:
+- HTML
+- CSS
+- JavaScript
+- Node.js
+- MongoDB
+- EJS
+- Git
+
+Requirements:
+- use animated icons instead of plain text
+- hover tooltip on each skill
+- animated connecting node lines between related technologies
+- node lines react subtly on hover
+- futuristic interactive layout
+- glowing hover effects
+
+Example:
+HTML ↔ CSS ↔ JavaScript
+Node.js ↔ MongoDB
+
+4. PHILOSOPHY SECTION
+Show:
+- starts from design
+- values structure
+- experimental mindset
+- creative problem solving
+- scalable thinking
+
+5. PROJECT SECTION
+ONLY ONE project section.
+
+Main project:
+“Nexus POS”
+
+Use uploaded:
+- project context file
+- project screenshots/images
+
+Present it like a premium SaaS product showcase.
+
+Include:
+- cinematic project presentation
+- dashboard visuals
+- feature showcase
+- analytics visuals
+- settings showcase
+- keyboard shortcut showcase
+- problem → solution flow
+- interactive layouts
+- animated showcase cards
+
+6. GITHUB SECTION
+GitHub:
+https://github.com/khuzaimanew1-byte/
+
+7. CONTACT SECTION
+Email:
+Khuzaimadeveloper777@gmail.com
+
+━━━━━━━━━━━━━━━━━━
+TECHNICAL REQUIREMENTS
+━━━━━━━━━━━━━━━━━━
+
+- fully responsive
+- modular architecture
+- reusable components
+- scalable codebase
+- clean folder structure
+- optimized animations
+- smooth rendering
+- professional code quality
+
+━━━━━━━━━━━━━━━━━━
+FINAL GOAL
+━━━━━━━━━━━━━━━━━━
+
+The final website should feel:
+- premium
+- cinematic
+- modern
+- advanced
+- visually memorable
+- interactive but clean
+- like a serious high-end developer portfolio
+
+It must NOT feel like:
+- a template portfolio
+- a beginner website
+- an overdesigned animation playground
+- a generic landing page
