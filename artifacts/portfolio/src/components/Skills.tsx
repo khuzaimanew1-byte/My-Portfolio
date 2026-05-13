@@ -434,7 +434,7 @@ function NodeCard({
       <motion.div
         initial={{opacity:0,scale:0.12,x:node.entryX,y:node.entryY}}
         animate={visible
-          ?{opacity:isDimmed?0.1:1,scale:1,x:0,y:0}
+          ?{opacity:1,scale:1,x:0,y:0}
           :{opacity:0,scale:0.12,x:node.entryX,y:node.entryY}}
         transition={{type:"spring",stiffness:120,damping:20,mass:1.4,
           opacity:{duration:0.3}}}
