@@ -8,19 +8,38 @@ import {
 } from "react-icons/si";
 import { FileCode2 } from "lucide-react";
 
-/* ─── VS Code official icon ──────────────────────────────────── */
+/* ─── VS Code icon ───────────────────────────────────────────── */
 function VSCodeIcon({ size, active }: { size: number; active: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="#007ACC"
-      style={{ filter: active ? "drop-shadow(0 0 5px #007ACCcc)" : "none", transition: "filter .3s" }}>
+      style={{ filter: active ? "drop-shadow(0 0 6px #007ACCcc)" : "none", transition: "filter .35s" }}>
       <path d="M23.15 2.587 18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.9 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z" />
     </svg>
   );
 }
 
-/* ─── easing helpers ─────────────────────────────────────────── */
-const easeOutCubic = (t: number) => 1 - Math.pow(1 - Math.min(1, t), 3);
-const easeInQuad   = (t: number) => Math.min(1, t * t);
+/* ─── easing ─────────────────────────────────────────────────── */
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
+const easeInQuad   = (t: number) => Math.min(1, Math.max(0, t)) ** 2;
+const easeOutQuart = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 4);
+
+/* ─── animation timing ───────────────────────────────────────── */
+const INCOMING_DUR   = 460;  // ms — incoming lines travel toward hovered node
+const BURST_DELAY    = 110;  // ms — pause after incoming before outgoing fires
+const OUTGOING_DUR   = 520;  // ms — outgoing lines travel away from hovered node
+const FADE_DUR       = 260;  // ms — fade out on leave
+const IN_PULSE_PERIOD  = 620; // ms — incoming pulse loop period
+const OUT_PULSE_PERIOD = 700; // ms — outgoing pulse loop period
+const ICON_R           = 16; // px — icon radius (line trim)
+
+/* ─── hover animation state (drives rAF loop) ───────────────── */
+interface HoverAnim {
+  id: string;
+  startedAt: number;
+  outgoingStartAt: number;   // startedAt + INCOMING_DUR + BURST_DELAY
+  fadingAt: number | null;
+  burstFired: boolean;
+}
 
 /* ─── node definitions ───────────────────────────────────────── */
 interface NodeDef {
@@ -29,53 +48,47 @@ interface NodeDef {
   entryX: number; entryY: number;
   stagger: number;
   floatY: [number, number]; dur: number;
-  weight: number; // 0=unmovable, 1=lightest (moves most)
+  weight: number;
   renderIcon: (active: boolean) => React.ReactNode;
 }
 
 const S = 26;
 
 const nodes: NodeDef[] = [
-  /* left zone — lighter technologies */
   { id:"html",    name:"HTML",        color:"#E34F26",
-    x:6,  y:49, entryX:-170, entryY:20,  stagger:0,    floatY:[-4,3],   dur:5.8, weight:1.0,
-    renderIcon:(a)=><SiHtml5    size={S} style={{color:"#E34F26",filter:a?"drop-shadow(0 0 6px #E34F26cc)":"none",transition:"filter .3s"}} /> },
+    x:6,  y:49, entryX:-170, entryY:20,  stagger:0,    floatY:[-4,3], dur:5.8, weight:1.0,
+    renderIcon:(a)=><SiHtml5    size={S} style={{color:"#E34F26",filter:a?"drop-shadow(0 0 6px #E34F26cc)":"none",transition:"filter .35s"}} /> },
   { id:"css",     name:"CSS3",        color:"#264DE4",
-    x:22, y:10, entryX:-85,  entryY:-115,stagger:130,  floatY:[-3,5],   dur:6.3, weight:0.95,
-    renderIcon:(a)=><SiCss      size={S} style={{color:"#264DE4",filter:a?"drop-shadow(0 0 6px #264DE4cc)":"none",transition:"filter .3s"}} /> },
+    x:22, y:10, entryX:-85,  entryY:-115,stagger:130,  floatY:[-3,5], dur:6.3, weight:0.95,
+    renderIcon:(a)=><SiCss      size={S} style={{color:"#264DE4",filter:a?"drop-shadow(0 0 6px #264DE4cc)":"none",transition:"filter .35s"}} /> },
   { id:"ejs",     name:"EJS",         color:"#B9473A",
-    x:26, y:78, entryX:-75,  entryY:120, stagger:220,  floatY:[-5,3],   dur:5.5, weight:0.85,
-    renderIcon:(a)=><FileCode2  size={S} style={{color:"#B9473A",filter:a?"drop-shadow(0 0 6px #B9473Acc)":"none",transition:"filter .3s"}} /> },
-  /* central hub — core, heavy */
+    x:26, y:78, entryX:-75,  entryY:120, stagger:220,  floatY:[-5,3], dur:5.5, weight:0.85,
+    renderIcon:(a)=><FileCode2  size={S} style={{color:"#B9473A",filter:a?"drop-shadow(0 0 6px #B9473Acc)":"none",transition:"filter .35s"}} /> },
   { id:"js",      name:"JavaScript",  color:"#F0DB4F",
-    x:43, y:51, entryX:0,    entryY:85,  stagger:380,  floatY:[-4,4],   dur:5.0, weight:0.50,
-    renderIcon:(a)=><SiJavascript size={S} style={{color:"#F0DB4F",filter:a?"drop-shadow(0 0 6px #F0DB4Fcc)":"none",transition:"filter .3s"}} /> },
-  /* upper-right cluster */
+    x:43, y:51, entryX:0,    entryY:85,  stagger:380,  floatY:[-4,4], dur:5.0, weight:0.50,
+    renderIcon:(a)=><SiJavascript size={S} style={{color:"#F0DB4F",filter:a?"drop-shadow(0 0 6px #F0DB4Fcc)":"none",transition:"filter .35s"}} /> },
   { id:"nodejs",  name:"Node.js",     color:"#3C873A",
-    x:65, y:8,  entryX:25,   entryY:-135,stagger:490,  floatY:[-5,3],   dur:6.1, weight:0.62,
-    renderIcon:(a)=><SiNodedotjs size={S} style={{color:"#3C873A",filter:a?"drop-shadow(0 0 6px #3C873Acc)":"none",transition:"filter .3s"}} /> },
-  /* lower-center */
+    x:65, y:8,  entryX:25,   entryY:-135,stagger:490,  floatY:[-5,3], dur:6.1, weight:0.62,
+    renderIcon:(a)=><SiNodedotjs size={S} style={{color:"#3C873A",filter:a?"drop-shadow(0 0 6px #3C873Acc)":"none",transition:"filter .35s"}} /> },
   { id:"git",     name:"Git",         color:"#F05032",
-    x:56, y:83, entryX:-15,  entryY:145, stagger:580,  floatY:[-3,6],   dur:6.5, weight:0.80,
-    renderIcon:(a)=><SiGit     size={S} style={{color:"#F05032",filter:a?"drop-shadow(0 0 6px #F05032cc)":"none",transition:"filter .3s"}} /> },
-  /* right hub — core, heavy */
+    x:56, y:83, entryX:-15,  entryY:145, stagger:580,  floatY:[-3,6], dur:6.5, weight:0.80,
+    renderIcon:(a)=><SiGit     size={S} style={{color:"#F05032",filter:a?"drop-shadow(0 0 6px #F05032cc)":"none",transition:"filter .35s"}} /> },
   { id:"express", name:"Express.js",  color:"#d8d8d8",
-    x:72, y:43, entryX:145,  entryY:0,   stagger:730,  floatY:[-4,4],   dur:5.3, weight:0.50,
-    renderIcon:(a)=><SiExpress size={S} style={{color:"#d8d8d8",filter:a?"drop-shadow(0 0 6px #d8d8d8cc)":"none",transition:"filter .3s"}} /> },
-  /* right endpoint spread */
+    x:72, y:43, entryX:145,  entryY:0,   stagger:730,  floatY:[-4,4], dur:5.3, weight:0.50,
+    renderIcon:(a)=><SiExpress size={S} style={{color:"#d8d8d8",filter:a?"drop-shadow(0 0 6px #d8d8d8cc)":"none",transition:"filter .35s"}} /> },
   { id:"mongodb", name:"MongoDB",     color:"#47A248",
-    x:88, y:13, entryX:115,  entryY:-105,stagger:840,  floatY:[-5,4],   dur:5.7, weight:0.75,
-    renderIcon:(a)=><SiMongodb size={S} style={{color:"#47A248",filter:a?"drop-shadow(0 0 6px #47A248cc)":"none",transition:"filter .3s"}} /> },
+    x:88, y:13, entryX:115,  entryY:-105,stagger:840,  floatY:[-5,4], dur:5.7, weight:0.75,
+    renderIcon:(a)=><SiMongodb size={S} style={{color:"#47A248",filter:a?"drop-shadow(0 0 6px #47A248cc)":"none",transition:"filter .35s"}} /> },
   { id:"vscode",  name:"VS Code",     color:"#007ACC",
-    x:93, y:54, entryX:158,  entryY:0,   stagger:950,  floatY:[-3,5],   dur:6.2, weight:0.82,
+    x:93, y:54, entryX:158,  entryY:0,   stagger:950,  floatY:[-3,5], dur:6.2, weight:0.82,
     renderIcon:(a)=><VSCodeIcon size={S} active={a} /> },
   { id:"ai",      name:"AI Dev",      color:"#10a37f",
-    x:81, y:84, entryX:110,  entryY:115, stagger:1060, floatY:[-5,3],   dur:5.9, weight:0.90,
-    renderIcon:(a)=><SiOpenai  size={S} style={{color:"#10a37f",filter:a?"drop-shadow(0 0 6px #10a37fcc)":"none",transition:"filter .3s"}} /> },
+    x:81, y:84, entryX:110,  entryY:115, stagger:1060, floatY:[-5,3], dur:5.9, weight:0.90,
+    renderIcon:(a)=><SiOpenai  size={S} style={{color:"#10a37f",filter:a?"drop-shadow(0 0 6px #10a37fcc)":"none",transition:"filter .35s"}} /> },
 ];
 
-/* ─── edges with asymmetric bezier bends ────────────────────── */
-interface EdgeDef { a:string; b:string; b1:number; b2:number; }
+/* ─── edges ──────────────────────────────────────────────────── */
+interface EdgeDef { a: string; b: string; b1: number; b2: number; }
 const edges: EdgeDef[] = [
   { a:"html",    b:"css",     b1: 0.20, b2: 0.09 },
   { a:"html",    b:"ejs",     b1:-0.10, b2:-0.20 },
@@ -89,33 +102,15 @@ const edges: EdgeDef[] = [
   { a:"express", b:"ai",      b1:-0.18, b2:-0.08 },
 ];
 
-const edgeRevealAt: Record<string,number> = {
+const edgeRevealAt: Record<string, number> = {
   "html::css":210, "html::ejs":310, "css::js":470, "ejs::js":480,
   "js::nodejs":570, "js::git":670, "nodejs::express":820,
   "express::mongodb":930, "express::vscode":1040, "express::ai":1150,
 };
-const ek = (e:EdgeDef) => `${e.a}::${e.b}`;
+const ek = (e: EdgeDef) => `${e.a}::${e.b}`;
 
-const ICON_R    = 16;
-const DRAW_IN   = 580;
-const DRAW_OUT  = 220;
-const PULSE_DUR = 880;
-
-/* ─── physics constants ──────────────────────────────────────── */
-const REPULSION_RADIUS  = 140;  // px — cursor influence radius
-const SPRING_STIFFNESS  = 145;  // normal spring
-const SPRING_DAMPING    = 17;
-const HOVER_STIFFNESS   = 260;  // hovered node feels heavier
-const HOVER_DAMPING     = 30;
-const CONNECTED_RESIST  = 0.55; // connected nodes move less
-const HOVER_STABILITY   = 0.12; // hovered node barely moves
-const DT                = 1 / 60;
-
-/* ─── bezier with asymmetric control points ──────────────────── */
-function buildPath(
-  ax:number, ay:number, bx:number, by:number,
-  b1:number, b2:number
-): string {
+/* ─── build bezier path ──────────────────────────────────────── */
+function buildPath(ax:number,ay:number,bx:number,by:number,b1:number,b2:number):string {
   const dx=bx-ax, dy=by-ay;
   const len=Math.sqrt(dx*dx+dy*dy)||1;
   if (len < ICON_R*2+4) return "";
@@ -131,19 +126,34 @@ function buildPath(
 
 function getNode(id:string){ return nodes.find(n=>n.id===id)!; }
 
-/* adjacency check */
 const isEdgeConnected = (nodeId:string, otherId:string|null) => {
   if (!otherId) return false;
-  return edges.some(e =>
-    (e.a === nodeId && e.b === otherId) ||
-    (e.b === nodeId && e.a === otherId)
-  );
+  return edges.some(e=>(e.a===nodeId&&e.b===otherId)||(e.b===nodeId&&e.a===otherId));
 };
 
-interface HoverState { id:string|null; phase:0|1|2|3|4 }
-
-/* ─── physics state per node ─────────────────────────────────── */
+/* ─── physics ─────────────────────────────────────────────────── */
 interface NodePhysics { sx:number; sy:number; vx:number; vy:number; }
+const REPULSION_RADIUS = 140;
+const SPRING_STIFFNESS = 145;
+const SPRING_DAMPING   = 17;
+const HOVER_STIFFNESS  = 260;
+const HOVER_DAMPING    = 30;
+const CONNECTED_RESIST = 0.55;
+const HOVER_STABILITY  = 0.12;
+const DT               = 1/60;
+
+/* ─── node visual state (for React / Framer Motion) ─────────── */
+interface NodeVisual {
+  hovId: string | null;
+  incomingSet: Set<string>;  // node IDs that send signal INTO hovered node
+  outgoingSet: Set<string>;  // node IDs that receive signal FROM hovered node
+  burst: boolean;
+  settled: boolean;          // outgoing phase has started
+}
+const NV_IDLE: NodeVisual = {
+  hovId: null, incomingSet: new Set(), outgoingSet: new Set(),
+  burst: false, settled: false,
+};
 
 /* ══════════════════════════════════════════════════════════════ */
 export function Skills() {
@@ -151,33 +161,38 @@ export function Skills() {
   const containerRef  = useRef<HTMLDivElement>(null);
   const sectionInView = useInView(sectionRef, { once:true, amount:0.2 });
 
-  /* stable refs */
-  const nodeIconRefs = useRef<Record<string,{current:HTMLDivElement|null}>>(
+  /* node DOM refs */
+  const nodeIconRefs  = useRef<Record<string,{current:HTMLDivElement|null}>>(
     Object.fromEntries(nodes.map(n=>[n.id,{current:null}]))
   );
   const nodeOuterRefs = useRef<Record<string,HTMLDivElement|null>>({});
+  const burstRefs     = useRef<Record<string,HTMLDivElement|null>>({});
+
+  /* SVG / pulse refs */
   const mainPathRefs = useRef<Record<string,SVGPathElement|null>>({});
   const glowPathRefs = useRef<Record<string,SVGPathElement|null>>({});
-  const pulseRefs    = useRef<Record<string,HTMLDivElement|null>>({});
+  const inPulseRefs  = useRef<Record<string,HTMLDivElement|null>>({});
+  const outPulseRefs = useRef<Record<string,HTMLDivElement|null>>({});
+
   const revealedRef  = useRef<Set<string>>(new Set());
   const ambientRef   = useRef<HTMLDivElement|null>(null);
 
-  /* mouse physics refs */
-  const mouseRef = useRef<{x:number;y:number}|null>(null);
-  const physicsRef = useRef<Record<string, NodePhysics>>(
-    Object.fromEntries(nodes.map(n => [n.id, { sx:0, sy:0, vx:0, vy:0 }]))
+  /* animation state machine */
+  const hoverAnimRef = useRef<HoverAnim|null>(null);
+
+  /* mouse physics */
+  const mouseRef   = useRef<{x:number;y:number}|null>(null);
+  const physicsRef = useRef<Record<string,NodePhysics>>(
+    Object.fromEntries(nodes.map(n=>[n.id,{sx:0,sy:0,vx:0,vy:0}]))
   );
 
-  /* draw-timing refs */
-  const activatedAt   = useRef<Record<string,number|null>>({});
-  const deactivatedAt = useRef<Record<string,number|null>>({});
-
-  /* state */
+  /* React state */
   const [nodesVisible, setNodesVisible] = useState<boolean[]>(()=>nodes.map(()=>false));
-  const [hover, setHover]               = useState<HoverState>({id:null,phase:0});
-  const hoverRef      = useRef<HoverState>(hover);
-  hoverRef.current    = hover;
-  const hoverTimers   = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [nv, setNv] = useState<NodeVisual>(NV_IDLE);
+  const nvRef = useRef<NodeVisual>(NV_IDLE);
+  nvRef.current = nv;
+
+  const hoverTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   /* ── section inView: stagger reveals ─── */
   useEffect(()=>{
@@ -192,111 +207,123 @@ export function Skills() {
     return ()=>ts.forEach(clearTimeout);
   },[sectionInView]);
 
-  /* ── hover handlers ─── */
+  /* ── enter: begin sequential chain-reaction ─── */
   const handleEnter = useCallback((id:string)=>{
     hoverTimers.current.forEach(clearTimeout);
     hoverTimers.current=[];
-    setHover({id,phase:1});
-    hoverTimers.current.push(setTimeout(()=>setHover({id,phase:2}),70));
-    hoverTimers.current.push(setTimeout(()=>setHover({id,phase:3}),165));
-    hoverTimers.current.push(setTimeout(()=>setHover({id,phase:4}),265));
+
+    const nowMs = performance.now();
+    const incomingNodes = new Set(edges.filter(e=>e.b===id).map(e=>e.a));
+    const outgoingNodes = new Set(edges.filter(e=>e.a===id).map(e=>e.b));
+
+    /* set rAF animation anchor */
+    hoverAnimRef.current = {
+      id,
+      startedAt: nowMs,
+      outgoingStartAt: nowMs + INCOMING_DUR + BURST_DELAY,
+      fadingAt: null,
+      burstFired: false,
+    };
+
+    /* phase 1 — immediately: hovered + incoming neighbors lit */
+    setNv({ hovId:id, incomingSet:incomingNodes, outgoingSet:new Set(), burst:false, settled:false });
+
+    /* phase 2 — burst moment */
+    hoverTimers.current.push(setTimeout(()=>{
+      if (hoverAnimRef.current?.id!==id) return;
+      setNv(prev=>prev.hovId===id?{...prev,burst:true}:prev);
+    }, INCOMING_DUR));
+
+    /* phase 3 — outgoing propagation + tooltip */
+    hoverTimers.current.push(setTimeout(()=>{
+      if (hoverAnimRef.current?.id!==id) return;
+      setNv(prev=>prev.hovId===id
+        ?{...prev,burst:false,outgoingSet:outgoingNodes,settled:true}
+        :prev);
+    }, INCOMING_DUR + BURST_DELAY + 80));
+
   },[]);
 
+  /* ── leave: fade everything out ─── */
   const handleLeave = useCallback(()=>{
     hoverTimers.current.forEach(clearTimeout);
     hoverTimers.current=[];
-    setHover({id:null,phase:0});
+
+    if (hoverAnimRef.current) {
+      hoverAnimRef.current.fadingAt = performance.now();
+    }
+
+    hoverTimers.current.push(setTimeout(()=>{
+      hoverAnimRef.current=null;
+      setNv(NV_IDLE);
+    }, FADE_DUR+60));
   },[]);
 
   /* ── mouse tracking ─── */
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>)=>{
-    const cr = containerRef.current?.getBoundingClientRect();
-    if (cr) mouseRef.current = { x: e.clientX - cr.left, y: e.clientY - cr.top };
+  const handleMouseMove = useCallback((e:React.MouseEvent<HTMLDivElement>)=>{
+    const cr=containerRef.current?.getBoundingClientRect();
+    if (cr) mouseRef.current={x:e.clientX-cr.left, y:e.clientY-cr.top};
   },[]);
 
   const handleContainerLeave = useCallback(()=>{
-    mouseRef.current = null;
+    mouseRef.current=null;
     handleLeave();
   },[handleLeave]);
 
-  /* ── rAF: physics + coords → imperative SVG + pulse updates ─── */
+  /* ── main rAF loop ─── */
   useEffect(()=>{
     let raf:number;
+
     const loop=()=>{
       const container=containerRef.current;
       if (!container){raf=requestAnimationFrame(loop);return;}
       const cr=container.getBoundingClientRect();
       const now=performance.now();
+      const anim=hoverAnimRef.current;
 
-      /* ── step 1: physics per node ─── */
-      const hovId = hoverRef.current.id;
-      for (const n of nodes) {
-        const p = physicsRef.current[n.id];
-        const outerEl = nodeOuterRefs.current[n.id];
+      /* ── physics ─── */
+      const hovId=anim?.id??null;
+      for (const n of nodes){
+        const p=physicsRef.current[n.id];
+        const outerEl=nodeOuterRefs.current[n.id];
+        const naturalX=n.x/100*cr.width;
+        const naturalY=n.y/100*cr.height;
+        const cx=naturalX+p.sx, cy=naturalY+p.sy;
+        let tx=0, ty=0;
 
-        /* natural center (% based) relative to container */
-        const naturalX = n.x / 100 * cr.width;
-        const naturalY = n.y / 100 * cr.height;
-
-        /* current displaced center */
-        const cx = naturalX + p.sx;
-        const cy = naturalY + p.sy;
-
-        let targetX = 0;
-        let targetY = 0;
-
-        if (mouseRef.current) {
-          const mx = mouseRef.current.x;
-          const my = mouseRef.current.y;
-          const ddx = cx - mx;
-          const ddy = cy - my;
-          const dist = Math.sqrt(ddx * ddx + ddy * ddy);
-
-          if (dist < REPULSION_RADIUS && dist > 1) {
-            /* max displacement scales with node weight: 4–14px */
-            const maxDisp = 4 + n.weight * 10;
-            const t = 1 - dist / REPULSION_RADIUS;
-            const force = t * t * maxDisp;
-
-            /* hovered node is heavy — barely displaced */
-            const isHovered = hovId === n.id;
-            const hovFactor = isHovered ? HOVER_STABILITY : 1.0;
-
-            /* connected nodes resist */
-            const connected = isEdgeConnected(n.id, hovId);
-            const connFactor = connected ? CONNECTED_RESIST : 1.0;
-
-            targetX = (ddx / dist) * force * hovFactor * connFactor;
-            targetY = (ddy / dist) * force * hovFactor * connFactor;
+        if (mouseRef.current){
+          const {x:mx,y:my}=mouseRef.current;
+          const ddx=cx-mx, ddy=cy-my;
+          const dist=Math.sqrt(ddx*ddx+ddy*ddy);
+          if (dist<REPULSION_RADIUS&&dist>1){
+            const maxDisp=4+n.weight*10;
+            const tf=1-dist/REPULSION_RADIUS;
+            const force=tf*tf*maxDisp;
+            const isHov=hovId===n.id;
+            const hovF=isHov?HOVER_STABILITY:1.0;
+            const connF=isEdgeConnected(n.id,hovId)?CONNECTED_RESIST:1.0;
+            tx=(ddx/dist)*force*hovF*connF;
+            ty=(ddy/dist)*force*hovF*connF;
           }
         }
 
-        /* spring integration */
-        const isHovered = hovId === n.id;
-        const stiffness = isHovered ? HOVER_STIFFNESS : SPRING_STIFFNESS;
-        const damping   = isHovered ? HOVER_DAMPING   : SPRING_DAMPING;
-
-        const ax = (targetX - p.sx) * stiffness * DT - p.vx * damping * DT;
-        const ay = (targetY - p.sy) * stiffness * DT - p.vy * damping * DT;
-        p.vx += ax;
-        p.vy += ay;
-        p.sx += p.vx * DT;
-        p.sy += p.vy * DT;
-
-        /* clamp to max safe displacement */
-        const maxAbs = 16;
-        p.sx = Math.max(-maxAbs, Math.min(maxAbs, p.sx));
-        p.sy = Math.max(-maxAbs, Math.min(maxAbs, p.sy));
-
-        /* apply transform to outer node div */
-        if (outerEl) {
-          outerEl.style.transform =
+        const isHov=hovId===n.id;
+        const stiff=isHov?HOVER_STIFFNESS:SPRING_STIFFNESS;
+        const damp=isHov?HOVER_DAMPING:SPRING_DAMPING;
+        const ax=(tx-p.sx)*stiff*DT-p.vx*damp*DT;
+        const ay=(ty-p.sy)*stiff*DT-p.vy*damp*DT;
+        p.vx+=ax; p.vy+=ay; p.sx+=p.vx*DT; p.sy+=p.vy*DT;
+        const maxAbs=16;
+        p.sx=Math.max(-maxAbs,Math.min(maxAbs,p.sx));
+        p.sy=Math.max(-maxAbs,Math.min(maxAbs,p.sy));
+        if (outerEl){
+          outerEl.style.transform=
             `translate(calc(-50% + ${p.sx.toFixed(2)}px), calc(-50% + ${p.sy.toFixed(2)}px))`;
         }
       }
 
-      /* ── step 2: read displaced coords for SVG ─── */
-      const coords: Record<string,{x:number;y:number}> = {};
+      /* ── read displaced coords ─── */
+      const coords:Record<string,{x:number;y:number}>={};
       for (const n of nodes){
         const el=nodeIconRefs.current[n.id]?.current;
         if (!el) continue;
@@ -304,116 +331,206 @@ export function Skills() {
         coords[n.id]={x:r.left-cr.left+r.width/2, y:r.top-cr.top+r.height/2};
       }
 
-      const {id:hovIdFull,phase}=hoverRef.current;
-      const activeNode=hovIdFull?getNode(hovIdFull):null;
-      const lineColor=activeNode?.color??"#2dd4bf";
-
-      /* ambient glow overlay */
+      /* ── ambient glow ─── */
       if (ambientRef.current){
-        if (hovIdFull && activeNode){
-          const nc=coords[hovIdFull];
+        if (anim&&!anim.fadingAt){
+          const nc=coords[anim.id];
           if (nc){
-            const pct=(x:number,dim:number)=>`${((x/dim)*100).toFixed(1)}%`;
-            const w=cr.width, h=cr.height;
+            const activeNode=getNode(anim.id);
+            const pct=(x:number,d:number)=>`${((x/d)*100).toFixed(1)}%`;
             ambientRef.current.style.background=
-              `radial-gradient(380px at ${pct(nc.x,w)} ${pct(nc.y,h)}, ${activeNode.color}0D, transparent 70%)`;
+              `radial-gradient(360px at ${pct(nc.x,cr.width)} ${pct(nc.y,cr.height)}, ${activeNode.color}11, transparent 70%)`;
           }
         } else {
           ambientRef.current.style.background="transparent";
         }
       }
 
+      /* ── energy burst at hovered node ─── */
+      if (anim&&!anim.burstFired&&now>=anim.startedAt+INCOMING_DUR){
+        anim.burstFired=true;
+        const burstEl=burstRefs.current[anim.id];
+        if (burstEl){
+          burstEl.style.animation="none";
+          void burstEl.offsetWidth; // force reflow
+          burstEl.style.animation="node-burst 420ms cubic-bezier(0.22,1,0.36,1) forwards";
+        }
+      }
+
+      /* ── per-edge: lines + pulses ─── */
       for (const edge of edges){
         const key=ek(edge);
         const ca=coords[edge.a], cb=coords[edge.b];
         if (!ca||!cb) continue;
         const d=buildPath(ca.x,ca.y,cb.x,cb.y,edge.b1,edge.b2);
+        if (!d) continue;
 
-        const isIncoming=edge.b===hovIdFull;
-        const isOutgoing=edge.a===hovIdFull;
-        const edgeActive=hovIdFull!==null&&(
-          (isIncoming&&phase>=1)||(isOutgoing&&phase>=3)
-        );
         const wasRevealed=revealedRef.current.has(key);
-
-        if (edgeActive && activatedAt.current[key]==null){
-          activatedAt.current[key]=now;
-          deactivatedAt.current[key]=null;
-        }
-        if (!edgeActive && activatedAt.current[key]!=null && deactivatedAt.current[key]==null){
-          deactivatedAt.current[key]=now;
-          activatedAt.current[key]=null;
-        }
-
-        let drawProg=0, fadeProg=1;
-        if (edgeActive && activatedAt.current[key]!=null){
-          drawProg=easeOutCubic((now-activatedAt.current[key]!)/DRAW_IN);
-        }
-        if (!edgeActive && deactivatedAt.current[key]!=null){
-          fadeProg=1-easeInQuad((now-deactivatedAt.current[key]!)/DRAW_OUT);
-          if (fadeProg<0){fadeProg=0;deactivatedAt.current[key]=null;}
-        }
-
         const main=mainPathRefs.current[key];
-        if (main && d){
-          main.setAttribute("d",d);
-          main.setAttribute("pathLength","1");
-          if (edgeActive){
+        const glow=glowPathRefs.current[key];
+        const inPulse=inPulseRefs.current[key];
+        const outPulse=outPulseRefs.current[key];
+
+        /* update path geometry */
+        if (main){ main.setAttribute("d",d); main.setAttribute("pathLength","1"); }
+        if (glow){ glow.setAttribute("d",d); glow.setAttribute("pathLength","1"); }
+        if (inPulse)  inPulse.style.offsetPath=`path("${d}")`;
+        if (outPulse) outPulse.style.offsetPath=`path("${d}")`;
+
+        /* no active hover → ghost or invisible */
+        if (!anim){
+          if (main){
+            if (wasRevealed){
+              main.style.stroke="rgba(255,255,255,0.032)";
+              main.style.strokeOpacity="1";
+              main.style.strokeDasharray="";
+              main.style.strokeDashoffset="";
+              main.style.strokeWidth="0.38";
+            } else { main.style.stroke="transparent"; }
+          }
+          if (glow) glow.style.stroke="transparent";
+          if (inPulse)  { inPulse.style.opacity="0";  inPulse.style.animation="none"; }
+          if (outPulse) { outPulse.style.opacity="0"; outPulse.style.animation="none"; }
+          continue;
+        }
+
+        const isIncoming = edge.b===anim.id;
+        const isOutgoing = edge.a===anim.id;
+        const lineColor  = getNode(anim.id).color;
+
+        /* fading out */
+        if (anim.fadingAt!==null){
+          const fadeT=(now-anim.fadingAt)/FADE_DUR;
+          const alpha=Math.max(0,1-easeInQuad(fadeT));
+          if (main&&(isIncoming||isOutgoing)){
             main.style.stroke=lineColor;
-            main.style.strokeOpacity="1";
-            main.style.strokeDasharray="1";
-            main.style.strokeDashoffset=(1-drawProg).toFixed(4);
+            main.style.strokeOpacity=(alpha*0.92).toFixed(3);
+            main.style.strokeDasharray="";
+            main.style.strokeDashoffset="";
             main.style.strokeWidth="0.85";
-          } else if (deactivatedAt.current[key]!=null || fadeProg<1){
-            main.style.stroke=lineColor;
-            main.style.strokeOpacity=fadeProg.toFixed(3);
-            main.style.strokeDasharray="1";
-            main.style.strokeDashoffset="0";
-          } else if (wasRevealed){
-            main.style.stroke="rgba(255,255,255,0.032)";
+          } else if (main&&wasRevealed){
+            main.style.stroke=`rgba(255,255,255,${(0.032*alpha).toFixed(4)})`;
             main.style.strokeOpacity="1";
             main.style.strokeDasharray="";
             main.style.strokeDashoffset="";
             main.style.strokeWidth="0.38";
-          } else {
-            main.style.stroke="transparent";
-          }
+          } else if (main){ main.style.stroke="transparent"; }
+          if (glow) glow.style.stroke="transparent";
+          if (inPulse)  { inPulse.style.opacity="0";  inPulse.style.animation="none"; }
+          if (outPulse) { outPulse.style.opacity="0"; outPulse.style.animation="none"; }
+          continue;
         }
 
-        const glow=glowPathRefs.current[key];
-        if (glow && d){
-          glow.setAttribute("d",d);
-          glow.setAttribute("pathLength","1");
-          if (edgeActive){
+        /* ── INCOMING edge: draws from source → hovered node ─── */
+        if (isIncoming){
+          const t=(now-anim.startedAt)/INCOMING_DUR;
+          const drawProg=easeOutQuart(t);
+
+          if (main){
+            main.style.stroke=lineColor;
+            main.style.strokeOpacity="0.92";
+            main.style.strokeDasharray="1";
+            main.style.strokeDashoffset=(Math.max(0,1-drawProg)).toFixed(4);
+            main.style.strokeWidth="0.9";
+          }
+          if (glow){
             glow.style.stroke=lineColor;
-            glow.style.strokeOpacity="0.10";
+            glow.style.strokeOpacity="0.12";
             glow.style.strokeDasharray="1";
-            glow.style.strokeDashoffset=(1-drawProg).toFixed(4);
-            glow.style.strokeWidth="3.5";
-          } else {
-            glow.style.stroke="transparent";
+            glow.style.strokeDashoffset=(Math.max(0,1-drawProg)).toFixed(4);
+            glow.style.strokeWidth="4";
           }
+
+          /* incoming pulse: travels A→B (toward hovered node) */
+          if (inPulse){
+            inPulse.style.opacity=Math.min(1,t*3).toFixed(3);
+            inPulse.style.background=lineColor;
+            inPulse.style.boxShadow=`0 0 6px 3px ${lineColor}55`;
+            if (!inPulse.dataset.running){
+              inPulse.dataset.running="1";
+              inPulse.style.animation=`none`;
+              void inPulse.offsetWidth;
+              inPulse.style.animation=`pulse-travel ${IN_PULSE_PERIOD}ms linear infinite`;
+            }
+          }
+          if (outPulse){ outPulse.style.opacity="0"; outPulse.style.animation="none"; delete outPulse.dataset.running; }
+          continue;
         }
 
-        const pulse=pulseRefs.current[key];
-        if (pulse && d){
-          pulse.style.offsetPath=`path("${d}")`;
-          if (edgeActive){
-            pulse.style.opacity="1";
-            pulse.style.background=lineColor;
-            pulse.style.boxShadow=`0 0 5px 2px ${lineColor}60`;
-            if (!pulse.style.animation||pulse.style.animation==="none"){
-              pulse.style.animation=`pulse-travel ${PULSE_DUR}ms linear infinite`;
+        /* ── OUTGOING edge: draws from hovered node → destination ─── */
+        if (isOutgoing){
+          const outStarted = now>=anim.outgoingStartAt;
+          const t = outStarted ? (now-anim.outgoingStartAt)/OUTGOING_DUR : 0;
+          const drawProg = outStarted ? easeOutCubic(t) : 0;
+
+          if (main){
+            if (outStarted){
+              main.style.stroke=lineColor;
+              main.style.strokeOpacity="0.88";
+              main.style.strokeDasharray="1";
+              main.style.strokeDashoffset=(Math.max(0,1-drawProg)).toFixed(4);
+              main.style.strokeWidth="0.85";
+            } else {
+              /* hold ghost while waiting */
+              if (wasRevealed){
+                main.style.stroke="rgba(255,255,255,0.032)";
+                main.style.strokeOpacity="1";
+                main.style.strokeDasharray="";
+                main.style.strokeDashoffset="";
+                main.style.strokeWidth="0.38";
+              } else { main.style.stroke="transparent"; }
             }
-          } else {
-            pulse.style.opacity="0";
-            pulse.style.animation="none";
           }
+          if (glow){
+            if (outStarted){
+              glow.style.stroke=lineColor;
+              glow.style.strokeOpacity="0.10";
+              glow.style.strokeDasharray="1";
+              glow.style.strokeDashoffset=(Math.max(0,1-drawProg)).toFixed(4);
+              glow.style.strokeWidth="3.5";
+            } else { glow.style.stroke="transparent"; }
+          }
+
+          /* outgoing pulse: travels hovered→B, only after outgoing starts */
+          if (outPulse){
+            if (outStarted){
+              outPulse.style.opacity=Math.min(1,(t)*4).toFixed(3);
+              outPulse.style.background=lineColor;
+              outPulse.style.boxShadow=`0 0 6px 3px ${lineColor}55`;
+              if (!outPulse.dataset.running){
+                outPulse.dataset.running="1";
+                outPulse.style.animation="none";
+                void outPulse.offsetWidth;
+                outPulse.style.animation=`pulse-travel ${OUT_PULSE_PERIOD}ms linear infinite`;
+              }
+            } else {
+              outPulse.style.opacity="0";
+              outPulse.style.animation="none";
+              delete outPulse.dataset.running;
+            }
+          }
+          if (inPulse){ inPulse.style.opacity="0"; inPulse.style.animation="none"; delete inPulse.dataset.running; }
+          continue;
         }
+
+        /* ── unrelated edge — ghost ─── */
+        if (main){
+          if (wasRevealed){
+            main.style.stroke="rgba(255,255,255,0.018)";
+            main.style.strokeOpacity="1";
+            main.style.strokeDasharray="";
+            main.style.strokeDashoffset="";
+            main.style.strokeWidth="0.38";
+          } else { main.style.stroke="transparent"; }
+        }
+        if (glow) glow.style.stroke="transparent";
+        if (inPulse)  { inPulse.style.opacity="0";  inPulse.style.animation="none"; delete inPulse.dataset.running; }
+        if (outPulse) { outPulse.style.opacity="0"; outPulse.style.animation="none"; delete outPulse.dataset.running; }
       }
 
       raf=requestAnimationFrame(loop);
     };
+
     raf=requestAnimationFrame(loop);
     return ()=>cancelAnimationFrame(raf);
   },[]);
@@ -448,17 +565,18 @@ export function Skills() {
           {/* ambient glow */}
           <div ref={ambientRef}
             className="absolute inset-0 pointer-events-none"
-            style={{transition:"background 0.7s ease", zIndex:0}}
+            style={{transition:"background 0.6s ease", zIndex:0}}
           />
 
           {/* Layer 1 — SVG lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{overflow:"visible",zIndex:1}}>
+          <svg className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{overflow:"visible",zIndex:1}}>
             {edges.map(edge=>{
               const key=ek(edge);
               return(
                 <g key={key}>
                   <path ref={el=>{glowPathRefs.current[key]=el;}}
-                    fill="none" stroke="transparent" strokeWidth={0} strokeLinecap="round"/>
+                    fill="none" stroke="transparent" strokeLinecap="round"/>
                   <path ref={el=>{mainPathRefs.current[key]=el;}}
                     fill="none" stroke="transparent" strokeWidth={0.38} strokeLinecap="round"/>
                 </g>
@@ -466,33 +584,42 @@ export function Skills() {
             })}
           </svg>
 
-          {/* Layer 2 — CSS motion-path pulses */}
-          <div className="absolute inset-0 pointer-events-none" style={{overflow:"hidden",zIndex:2}}>
+          {/* Layer 2 — directional pulses (two per edge: in + out) */}
+          <div className="absolute inset-0 pointer-events-none" style={{overflow:"visible",zIndex:2}}>
             {edges.map(edge=>{
               const key=ek(edge);
               return(
-                <div key={key} ref={el=>{pulseRefs.current[key]=el;}}
-                  style={{
-                    position:"absolute",top:0,left:0,
-                    width:5,height:5,borderRadius:"50%",
-                    background:"#2dd4bf",opacity:0,
-                    offsetDistance:"0%",
-                  }}
-                />
+                <div key={key}>
+                  {/* incoming pulse: travels A → hovered */}
+                  <div ref={el=>{inPulseRefs.current[key]=el;}}
+                    style={{
+                      position:"absolute",top:0,left:0,
+                      width:5,height:5,borderRadius:"50%",
+                      opacity:0, offsetDistance:"0%",
+                    }}
+                  />
+                  {/* outgoing pulse: travels hovered → B */}
+                  <div ref={el=>{outPulseRefs.current[key]=el;}}
+                    style={{
+                      position:"absolute",top:0,left:0,
+                      width:5,height:5,borderRadius:"50%",
+                      opacity:0, offsetDistance:"0%",
+                    }}
+                  />
+                </div>
               );
             })}
           </div>
 
           {/* Layer 3 — nodes */}
           {nodes.map((node,i)=>{
-            const {id:hovId,phase}=hover;
-            const isSelf      = hovId===node.id && phase>=2;
-            const isConnected = (
-              edges.some(e=>e.b===node.id&&e.a===hovId)||
-              edges.some(e=>e.a===node.id&&e.b===hovId)
-            ) && phase>=4;
-            const isDimmed    = hovId!==null && !isSelf && !isConnected;
-            const showTip     = hovId===node.id && phase>=4;
+            const isSelf        = nv.hovId===node.id;
+            const isIncomingConn= nv.incomingSet.has(node.id);
+            const isOutgoingConn= nv.outgoingSet.has(node.id);
+            const isConnected   = isIncomingConn||isOutgoingConn;
+            const isDimmed      = nv.hovId!==null&&!isSelf&&!isConnected;
+            const showTip       = isSelf&&nv.settled;
+            const inBurst       = isSelf&&nv.burst;
 
             return(
               <NodeCard
@@ -500,9 +627,11 @@ export function Skills() {
                 node={node} index={i}
                 visible={nodesVisible[i]}
                 isSelf={isSelf} isConnected={isConnected}
+                inBurst={inBurst}
                 isDimmed={isDimmed} showTip={showTip}
                 iconRef={nodeIconRefs.current[node.id] as RefObject<HTMLDivElement>}
-                outerRef={(el) => { nodeOuterRefs.current[node.id] = el; }}
+                outerRef={(el)=>{ nodeOuterRefs.current[node.id]=el; }}
+                burstRef={(el)=>{ burstRefs.current[node.id]=el; }}
                 onEnter={()=>handleEnter(node.id)}
                 onLeave={handleLeave}
               />
@@ -512,7 +641,16 @@ export function Skills() {
       </div>
 
       <style>{`
-        @keyframes pulse-travel{from{offset-distance:0%}to{offset-distance:100%}}
+        @keyframes pulse-travel { from { offset-distance:0% } to { offset-distance:100% } }
+        @keyframes node-burst {
+          0%   { transform:scale(0.7);  opacity:0.85; }
+          60%  { transform:scale(2.2);  opacity:0.45; }
+          100% { transform:scale(3.0);  opacity:0; }
+        }
+        @keyframes burst-ring {
+          0%   { transform:scale(1);   opacity:0.8; }
+          100% { transform:scale(2.6); opacity:0; }
+        }
       `}</style>
     </section>
   );
@@ -522,16 +660,18 @@ export function Skills() {
    NODE CARD
 ══════════════════════════════════════════════════════════════════ */
 function NodeCard({
-  node,index,visible,isSelf,isConnected,isDimmed,showTip,iconRef,outerRef,onEnter,onLeave,
+  node,index,visible,isSelf,isConnected,inBurst,isDimmed,showTip,
+  iconRef,outerRef,burstRef,onEnter,onLeave,
 }:{
-  node:NodeDef;index:number;visible:boolean;
-  isSelf:boolean;isConnected:boolean;isDimmed:boolean;showTip:boolean;
+  node:NodeDef; index:number; visible:boolean;
+  isSelf:boolean; isConnected:boolean; inBurst:boolean;
+  isDimmed:boolean; showTip:boolean;
   iconRef:RefObject<HTMLDivElement>;
   outerRef:(el:HTMLDivElement|null)=>void;
-  onEnter:()=>void;onLeave:()=>void;
+  burstRef:(el:HTMLDivElement|null)=>void;
+  onEnter:()=>void; onLeave:()=>void;
 }){
   return(
-    /* physics displacement is applied to this div's transform imperatively */
     <div
       ref={outerRef}
       style={{
@@ -541,40 +681,62 @@ function NodeCard({
         willChange:"transform",
       }}
     >
-      {/* entry spring + opacity dimming */}
       <motion.div
         initial={{opacity:0,scale:0.12,x:node.entryX,y:node.entryY}}
         animate={visible
-          ?{opacity:isDimmed?0.22:1,scale:1,x:0,y:0}
+          ?{opacity:isDimmed?0.18:1,scale:1,x:0,y:0}
           :{opacity:0,scale:0.12,x:node.entryX,y:node.entryY}}
         transition={{type:"spring",stiffness:120,damping:20,mass:1.4,
           opacity:{duration:0.3}}}
       >
-        {/* continuous float — nodeIconRef lives here */}
+        {/* float animation */}
         <motion.div
           ref={iconRef}
           animate={{y:node.floatY}}
           transition={{duration:node.dur,repeat:Infinity,repeatType:"mirror",
             ease:"easeInOut",delay:index*0.38}}
-          className="flex flex-col items-center cursor-default"
+          className="flex flex-col items-center cursor-default relative"
           onMouseEnter={onEnter}
           onMouseLeave={onLeave}
         >
-          {/* hover scale */}
+          {/* energy burst ring — fires imperatively via burstRef */}
+          <div
+            ref={burstRef}
+            style={{
+              position:"absolute",
+              inset:"-10px",
+              borderRadius:"50%",
+              border:`1.5px solid ${node.color}`,
+              opacity:0,
+              pointerEvents:"none",
+              zIndex:30,
+            }}
+          />
+
+          {/* icon scale */}
           <motion.div
-            animate={{scale:isSelf?1.3:isConnected?1.12:1}}
-            transition={{type:"spring",stiffness:320,damping:22}}
+            animate={{
+              scale: inBurst ? 1.45 : isSelf ? 1.28 : isConnected ? 1.12 : 1,
+              filter: inBurst
+                ? `drop-shadow(0 0 12px ${node.color}dd) drop-shadow(0 0 24px ${node.color}66)`
+                : "none",
+            }}
+            transition={{
+              type:"spring",
+              stiffness: inBurst ? 500 : 320,
+              damping:   inBurst ? 14  : 22,
+            }}
           >
-            {node.renderIcon(isSelf||isConnected)}
+            {node.renderIcon(isSelf||isConnected||inBurst)}
           </motion.div>
 
-          {/* tooltip */}
+          {/* tooltip — appears after outgoing propagation starts */}
           <AnimatePresence>
             {showTip&&(
               <motion.div key="tip"
-                initial={{opacity:0,y:-10,scale:0.84}}
+                initial={{opacity:0,y:-8,scale:0.88}}
                 animate={{opacity:1,y:0,scale:1}}
-                exit={{opacity:0,y:-6,scale:0.9}}
+                exit={{opacity:0,y:-6,scale:0.92}}
                 transition={{type:"spring",stiffness:480,damping:34}}
                 style={{
                   position:"absolute",
@@ -588,14 +750,14 @@ function NodeCard({
                   background:"rgba(5,8,13,0.97)",
                   border:`1px solid ${node.color}45`,
                   borderRadius:8,
-                  padding:"6px 14px",
+                  padding:"5px 12px",
                   backdropFilter:"blur(20px)",
                   boxShadow:`0 8px 32px rgba(0,0,0,0.7),0 0 0 1px ${node.color}15`,
                 }}>
                   <p style={{
                     margin:0,fontSize:11,fontWeight:700,
                     color:node.color,fontFamily:"Inter,sans-serif",
-                    letterSpacing:"0.04em",whiteSpace:"nowrap",
+                    letterSpacing:"0.04em",
                   }}>
                     {node.name}
                   </p>
