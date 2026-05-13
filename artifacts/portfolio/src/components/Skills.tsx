@@ -199,6 +199,9 @@ export function Skills() {
   const handleEnter = useCallback((id:string)=>{
     hoverTimers.current.forEach(clearTimeout);
     hoverTimers.current=[];
+    hoverStartRef.current    = performance.now();
+    hoverLeaveAtRef.current  = null;
+    lastHoveredIdRef.current = id;
     setHover({id,phase:1});
     hoverTimers.current.push(setTimeout(()=>setHover({id,phase:2}),70));
     hoverTimers.current.push(setTimeout(()=>setHover({id,phase:3}),165));
@@ -208,6 +211,11 @@ export function Skills() {
   const handleLeave = useCallback(()=>{
     hoverTimers.current.forEach(clearTimeout);
     hoverTimers.current=[];
+    if (hoverStartRef.current !== null) {
+      hovDurAtLeaveRef.current = performance.now() - hoverStartRef.current;
+    }
+    hoverLeaveAtRef.current = performance.now();
+    hoverStartRef.current   = null;
     setHover({id:null,phase:0});
   },[]);
 
@@ -307,9 +315,18 @@ export function Skills() {
         coords[n.id]={x:r.left-cr.left+r.width/2, y:r.top-cr.top+r.height/2};
       }
 
-      const {id:hovIdFull,phase}=hoverRef.current;
-      const activeNode=hovIdFull?getNode(hovIdFull):null;
-      const lineColor=activeNode?.color??"#2dd4bf";
+      const {id:hovIdFull}=hoverRef.current;
+
+      /* use last-hovered id for fade-out color/edge matching */
+      const effectiveHovId  = hovIdFull ?? lastHoveredIdRef.current;
+      const colorSourceId   = hovIdFull ?? lastHoveredIdRef.current;
+      const activeNode      = colorSourceId ? getNode(colorSourceId) : null;
+      const lineColor       = activeNode?.color ?? "#2dd4bf";
+
+      const isHovering      = hovIdFull !== null;
+      const hoverStart      = hoverStartRef.current;
+      const leaveAt         = hoverLeaveAtRef.current;
+      const hovDurAtLeave   = hovDurAtLeaveRef.current;
 
       /* ambient glow overlay */
       if (ambientRef.current){
@@ -332,85 +349,103 @@ export function Skills() {
         if (!ca||!cb) continue;
         const d=buildPath(ca.x,ca.y,cb.x,cb.y,edge.b1,edge.b2);
 
-        const isIncoming=edge.b===hovIdFull;
-        const isOutgoing=edge.a===hovIdFull;
-        const edgeActive=hovIdFull!==null&&(
-          (isIncoming&&phase>=1)||(isOutgoing&&phase>=3)
-        );
-        const wasRevealed=revealedRef.current.has(key);
+        const isIncoming = edge.b === effectiveHovId;
+        const isOutgoing = edge.a === effectiveHovId;
+        const wasRevealed = revealedRef.current.has(key);
 
-        if (edgeActive && activatedAt.current[key]==null){
-          activatedAt.current[key]=now;
-          deactivatedAt.current[key]=null;
-        }
-        if (!edgeActive && activatedAt.current[key]!=null && deactivatedAt.current[key]==null){
-          deactivatedAt.current[key]=now;
-          activatedAt.current[key]=null;
+        /* --- compute draw progress and pulse position --- */
+        let drawProg    = 0;   /* 0..1 — revealed portion of line        */
+        let lineOpacity = 0;   /* overall line opacity                   */
+        let pulsePos    = -1;  /* -1 = hidden, 0..1 = position on path  */
+
+        if (isHovering && hoverStart !== null && (isIncoming || isOutgoing)) {
+          const t = now - hoverStart;
+          lineOpacity = 1;
+
+          if (isIncoming) {
+            /* draw toward hovered node; pulse rides the leading edge */
+            drawProg = easeOutCubic(Math.min(1, t / INCOMING_DUR));
+            pulsePos = drawProg < 1
+              ? drawProg
+              : ((t - INCOMING_DUR) % PULSE_LOOP) / PULSE_LOOP;
+          } else {
+            /* outgoing — starts exactly when incoming draw completes */
+            const outT = t - INCOMING_DUR;
+            if (outT > 0) {
+              drawProg = easeOutCubic(Math.min(1, outT / OUTGOING_DUR));
+              pulsePos = drawProg < 1
+                ? drawProg
+                : ((outT - OUTGOING_DUR) % PULSE_LOOP) / PULSE_LOOP;
+            }
+            /* drawProg stays 0, pulsePos stays -1 until outT > 0 */
+          }
+
+        } else if (!isHovering && leaveAt !== null && (isIncoming || isOutgoing)) {
+          /* fade-out: freeze each line at its last achieved draw progress */
+          const leaveT  = now - leaveAt;
+          lineOpacity   = Math.max(0, 1 - easeInQuad(leaveT / FADE_DUR));
+
+          if (isIncoming) {
+            drawProg = easeOutCubic(Math.min(1, hovDurAtLeave / INCOMING_DUR));
+          } else {
+            const outT = hovDurAtLeave - INCOMING_DUR;
+            drawProg   = outT > 0 ? easeOutCubic(Math.min(1, outT / OUTGOING_DUR)) : 0;
+          }
+          /* no pulse during fade */
         }
 
-        let drawProg=0, fadeProg=1;
-        if (edgeActive && activatedAt.current[key]!=null){
-          drawProg=easeOutCubic((now-activatedAt.current[key]!)/DRAW_IN);
-        }
-        if (!edgeActive && deactivatedAt.current[key]!=null){
-          fadeProg=1-easeInQuad((now-deactivatedAt.current[key]!)/DRAW_OUT);
-          if (fadeProg<0){fadeProg=0;deactivatedAt.current[key]=null;}
-        }
-
+        /* --- apply to main path --- */
         const main=mainPathRefs.current[key];
         if (main && d){
           main.setAttribute("d",d);
           main.setAttribute("pathLength","1");
-          if (edgeActive){
-            main.style.stroke=lineColor;
-            main.style.strokeOpacity="1";
-            main.style.strokeDasharray="1";
-            main.style.strokeDashoffset=(1-drawProg).toFixed(4);
-            main.style.strokeWidth="0.85";
-          } else if (deactivatedAt.current[key]!=null || fadeProg<1){
-            main.style.stroke=lineColor;
-            main.style.strokeOpacity=fadeProg.toFixed(3);
-            main.style.strokeDasharray="1";
-            main.style.strokeDashoffset="0";
-          } else if (wasRevealed){
-            main.style.stroke="rgba(255,255,255,0.032)";
-            main.style.strokeOpacity="1";
-            main.style.strokeDasharray="";
-            main.style.strokeDashoffset="";
-            main.style.strokeWidth="0.38";
+          if (lineOpacity > 0 && drawProg > 0) {
+            main.style.stroke        = lineColor;
+            main.style.strokeOpacity = lineOpacity.toFixed(3);
+            main.style.strokeDasharray  = "1";
+            main.style.strokeDashoffset = (1 - drawProg).toFixed(4);
+            main.style.strokeWidth   = "0.85";
+          } else if (wasRevealed) {
+            main.style.stroke        = "rgba(255,255,255,0.032)";
+            main.style.strokeOpacity = "1";
+            main.style.strokeDasharray  = "";
+            main.style.strokeDashoffset = "";
+            main.style.strokeWidth   = "0.38";
           } else {
-            main.style.stroke="transparent";
+            main.style.stroke           = "transparent";
+            main.style.strokeDasharray  = "";
+            main.style.strokeDashoffset = "";
           }
         }
 
+        /* --- apply to glow path --- */
         const glow=glowPathRefs.current[key];
         if (glow && d){
           glow.setAttribute("d",d);
           glow.setAttribute("pathLength","1");
-          if (edgeActive){
-            glow.style.stroke=lineColor;
-            glow.style.strokeOpacity="0.10";
-            glow.style.strokeDasharray="1";
-            glow.style.strokeDashoffset=(1-drawProg).toFixed(4);
-            glow.style.strokeWidth="3.5";
+          if (lineOpacity > 0 && drawProg > 0) {
+            glow.style.stroke        = lineColor;
+            glow.style.strokeOpacity = (lineOpacity * 0.10).toFixed(3);
+            glow.style.strokeDasharray  = "1";
+            glow.style.strokeDashoffset = (1 - drawProg).toFixed(4);
+            glow.style.strokeWidth   = "3.5";
           } else {
-            glow.style.stroke="transparent";
+            glow.style.stroke = "transparent";
           }
         }
 
+        /* --- apply to pulse dot (always imperative, no CSS animation) --- */
         const pulse=pulseRefs.current[key];
         if (pulse && d){
-          pulse.style.offsetPath=`path("${d}")`;
-          if (edgeActive){
-            pulse.style.opacity="1";
-            pulse.style.background=lineColor;
-            pulse.style.boxShadow=`0 0 5px 2px ${lineColor}60`;
-            if (!pulse.style.animation||pulse.style.animation==="none"){
-              pulse.style.animation=`pulse-travel ${PULSE_DUR}ms linear infinite`;
-            }
+          pulse.style.offsetPath = `path("${d}")`;
+          pulse.style.animation  = "none";
+          if (pulsePos >= 0) {
+            pulse.style.opacity        = "1";
+            pulse.style.background     = lineColor;
+            pulse.style.boxShadow      = `0 0 5px 2px ${lineColor}60`;
+            pulse.style.offsetDistance = `${(pulsePos * 100).toFixed(2)}%`;
           } else {
-            pulse.style.opacity="0";
-            pulse.style.animation="none";
+            pulse.style.opacity = "0";
           }
         }
       }
