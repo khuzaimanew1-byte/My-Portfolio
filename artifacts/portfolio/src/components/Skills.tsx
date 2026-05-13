@@ -25,51 +25,52 @@ const easeInQuad   = (t: number) => Math.min(1, t * t);
 /* ─── node definitions ───────────────────────────────────────── */
 interface NodeDef {
   id: string; name: string; color: string;
-  x: number; y: number;           // % of container
-  entryX: number; entryY: number; // px intro offset
-  stagger: number;                // ms from inView
+  x: number; y: number;
+  entryX: number; entryY: number;
+  stagger: number;
   floatY: [number, number]; dur: number;
+  weight: number; // 0=unmovable, 1=lightest (moves most)
   renderIcon: (active: boolean) => React.ReactNode;
 }
 
 const S = 26;
 
 const nodes: NodeDef[] = [
-  /* left zone */
+  /* left zone — lighter technologies */
   { id:"html",    name:"HTML",        color:"#E34F26",
-    x:6,  y:49, entryX:-170, entryY:20,  stagger:0,    floatY:[-4,3],   dur:5.8,
+    x:6,  y:49, entryX:-170, entryY:20,  stagger:0,    floatY:[-4,3],   dur:5.8, weight:1.0,
     renderIcon:(a)=><SiHtml5    size={S} style={{color:"#E34F26",filter:a?"drop-shadow(0 0 6px #E34F26cc)":"none",transition:"filter .3s"}} /> },
   { id:"css",     name:"CSS3",        color:"#264DE4",
-    x:22, y:10, entryX:-85,  entryY:-115,stagger:130,  floatY:[-3,5],   dur:6.3,
+    x:22, y:10, entryX:-85,  entryY:-115,stagger:130,  floatY:[-3,5],   dur:6.3, weight:0.95,
     renderIcon:(a)=><SiCss      size={S} style={{color:"#264DE4",filter:a?"drop-shadow(0 0 6px #264DE4cc)":"none",transition:"filter .3s"}} /> },
   { id:"ejs",     name:"EJS",         color:"#B9473A",
-    x:26, y:78, entryX:-75,  entryY:120, stagger:220,  floatY:[-5,3],   dur:5.5,
+    x:26, y:78, entryX:-75,  entryY:120, stagger:220,  floatY:[-5,3],   dur:5.5, weight:0.85,
     renderIcon:(a)=><FileCode2  size={S} style={{color:"#B9473A",filter:a?"drop-shadow(0 0 6px #B9473Acc)":"none",transition:"filter .3s"}} /> },
-  /* central hub */
+  /* central hub — core, heavy */
   { id:"js",      name:"JavaScript",  color:"#F0DB4F",
-    x:43, y:51, entryX:0,    entryY:85,  stagger:380,  floatY:[-4,4],   dur:5.0,
+    x:43, y:51, entryX:0,    entryY:85,  stagger:380,  floatY:[-4,4],   dur:5.0, weight:0.50,
     renderIcon:(a)=><SiJavascript size={S} style={{color:"#F0DB4F",filter:a?"drop-shadow(0 0 6px #F0DB4Fcc)":"none",transition:"filter .3s"}} /> },
   /* upper-right cluster */
   { id:"nodejs",  name:"Node.js",     color:"#3C873A",
-    x:65, y:8,  entryX:25,   entryY:-135,stagger:490,  floatY:[-5,3],   dur:6.1,
+    x:65, y:8,  entryX:25,   entryY:-135,stagger:490,  floatY:[-5,3],   dur:6.1, weight:0.62,
     renderIcon:(a)=><SiNodedotjs size={S} style={{color:"#3C873A",filter:a?"drop-shadow(0 0 6px #3C873Acc)":"none",transition:"filter .3s"}} /> },
   /* lower-center */
   { id:"git",     name:"Git",         color:"#F05032",
-    x:56, y:83, entryX:-15,  entryY:145, stagger:580,  floatY:[-3,6],   dur:6.5,
+    x:56, y:83, entryX:-15,  entryY:145, stagger:580,  floatY:[-3,6],   dur:6.5, weight:0.80,
     renderIcon:(a)=><SiGit     size={S} style={{color:"#F05032",filter:a?"drop-shadow(0 0 6px #F05032cc)":"none",transition:"filter .3s"}} /> },
-  /* right hub — pulled left to avoid crowding edge */
+  /* right hub — core, heavy */
   { id:"express", name:"Express.js",  color:"#d8d8d8",
-    x:72, y:43, entryX:145,  entryY:0,   stagger:730,  floatY:[-4,4],   dur:5.3,
+    x:72, y:43, entryX:145,  entryY:0,   stagger:730,  floatY:[-4,4],   dur:5.3, weight:0.50,
     renderIcon:(a)=><SiExpress size={S} style={{color:"#d8d8d8",filter:a?"drop-shadow(0 0 6px #d8d8d8cc)":"none",transition:"filter .3s"}} /> },
   /* right endpoint spread */
   { id:"mongodb", name:"MongoDB",     color:"#47A248",
-    x:88, y:13, entryX:115,  entryY:-105,stagger:840,  floatY:[-5,4],   dur:5.7,
+    x:88, y:13, entryX:115,  entryY:-105,stagger:840,  floatY:[-5,4],   dur:5.7, weight:0.75,
     renderIcon:(a)=><SiMongodb size={S} style={{color:"#47A248",filter:a?"drop-shadow(0 0 6px #47A248cc)":"none",transition:"filter .3s"}} /> },
   { id:"vscode",  name:"VS Code",     color:"#007ACC",
-    x:93, y:54, entryX:158,  entryY:0,   stagger:950,  floatY:[-3,5],   dur:6.2,
+    x:93, y:54, entryX:158,  entryY:0,   stagger:950,  floatY:[-3,5],   dur:6.2, weight:0.82,
     renderIcon:(a)=><VSCodeIcon size={S} active={a} /> },
   { id:"ai",      name:"AI Dev",      color:"#10a37f",
-    x:81, y:84, entryX:110,  entryY:115, stagger:1060, floatY:[-5,3],   dur:5.9,
+    x:81, y:84, entryX:110,  entryY:115, stagger:1060, floatY:[-5,3],   dur:5.9, weight:0.90,
     renderIcon:(a)=><SiOpenai  size={S} style={{color:"#10a37f",filter:a?"drop-shadow(0 0 6px #10a37fcc)":"none",transition:"filter .3s"}} /> },
 ];
 
@@ -96,9 +97,19 @@ const edgeRevealAt: Record<string,number> = {
 const ek = (e:EdgeDef) => `${e.a}::${e.b}`;
 
 const ICON_R    = 16;
-const DRAW_IN   = 580; // ms — line draws in
-const DRAW_OUT  = 220; // ms — line fades out
-const PULSE_DUR = 880; // ms — pulse travel time
+const DRAW_IN   = 580;
+const DRAW_OUT  = 220;
+const PULSE_DUR = 880;
+
+/* ─── physics constants ──────────────────────────────────────── */
+const REPULSION_RADIUS  = 140;  // px — cursor influence radius
+const SPRING_STIFFNESS  = 145;  // normal spring
+const SPRING_DAMPING    = 17;
+const HOVER_STIFFNESS   = 260;  // hovered node feels heavier
+const HOVER_DAMPING     = 30;
+const CONNECTED_RESIST  = 0.55; // connected nodes move less
+const HOVER_STABILITY   = 0.12; // hovered node barely moves
+const DT                = 1 / 60;
 
 /* ─── bezier with asymmetric control points ──────────────────── */
 function buildPath(
@@ -120,7 +131,19 @@ function buildPath(
 
 function getNode(id:string){ return nodes.find(n=>n.id===id)!; }
 
+/* adjacency check */
+const isEdgeConnected = (nodeId:string, otherId:string|null) => {
+  if (!otherId) return false;
+  return edges.some(e =>
+    (e.a === nodeId && e.b === otherId) ||
+    (e.b === nodeId && e.a === otherId)
+  );
+};
+
 interface HoverState { id:string|null; phase:0|1|2|3|4 }
+
+/* ─── physics state per node ─────────────────────────────────── */
+interface NodePhysics { sx:number; sy:number; vx:number; vy:number; }
 
 /* ══════════════════════════════════════════════════════════════ */
 export function Skills() {
@@ -132,13 +155,20 @@ export function Skills() {
   const nodeIconRefs = useRef<Record<string,{current:HTMLDivElement|null}>>(
     Object.fromEntries(nodes.map(n=>[n.id,{current:null}]))
   );
+  const nodeOuterRefs = useRef<Record<string,HTMLDivElement|null>>({});
   const mainPathRefs = useRef<Record<string,SVGPathElement|null>>({});
   const glowPathRefs = useRef<Record<string,SVGPathElement|null>>({});
   const pulseRefs    = useRef<Record<string,HTMLDivElement|null>>({});
   const revealedRef  = useRef<Set<string>>(new Set());
   const ambientRef   = useRef<HTMLDivElement|null>(null);
 
-  /* draw-timing refs (no React re-render needed) */
+  /* mouse physics refs */
+  const mouseRef = useRef<{x:number;y:number}|null>(null);
+  const physicsRef = useRef<Record<string, NodePhysics>>(
+    Object.fromEntries(nodes.map(n => [n.id, { sx:0, sy:0, vx:0, vy:0 }]))
+  );
+
+  /* draw-timing refs */
   const activatedAt   = useRef<Record<string,number|null>>({});
   const deactivatedAt = useRef<Record<string,number|null>>({});
 
@@ -178,7 +208,18 @@ export function Skills() {
     setHover({id:null,phase:0});
   },[]);
 
-  /* ── rAF: coords → imperative SVG + pulse updates ─── */
+  /* ── mouse tracking ─── */
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>)=>{
+    const cr = containerRef.current?.getBoundingClientRect();
+    if (cr) mouseRef.current = { x: e.clientX - cr.left, y: e.clientY - cr.top };
+  },[]);
+
+  const handleContainerLeave = useCallback(()=>{
+    mouseRef.current = null;
+    handleLeave();
+  },[handleLeave]);
+
+  /* ── rAF: physics + coords → imperative SVG + pulse updates ─── */
   useEffect(()=>{
     let raf:number;
     const loop=()=>{
@@ -187,8 +228,75 @@ export function Skills() {
       const cr=container.getBoundingClientRect();
       const now=performance.now();
 
-      /* node pixel centers */
-      const coords:Record<string,{x:number;y:number}> = {};
+      /* ── step 1: physics per node ─── */
+      const hovId = hoverRef.current.id;
+      for (const n of nodes) {
+        const p = physicsRef.current[n.id];
+        const outerEl = nodeOuterRefs.current[n.id];
+
+        /* natural center (% based) relative to container */
+        const naturalX = n.x / 100 * cr.width;
+        const naturalY = n.y / 100 * cr.height;
+
+        /* current displaced center */
+        const cx = naturalX + p.sx;
+        const cy = naturalY + p.sy;
+
+        let targetX = 0;
+        let targetY = 0;
+
+        if (mouseRef.current) {
+          const mx = mouseRef.current.x;
+          const my = mouseRef.current.y;
+          const ddx = cx - mx;
+          const ddy = cy - my;
+          const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+
+          if (dist < REPULSION_RADIUS && dist > 1) {
+            /* max displacement scales with node weight: 4–14px */
+            const maxDisp = 4 + n.weight * 10;
+            const t = 1 - dist / REPULSION_RADIUS;
+            const force = t * t * maxDisp;
+
+            /* hovered node is heavy — barely displaced */
+            const isHovered = hovId === n.id;
+            const hovFactor = isHovered ? HOVER_STABILITY : 1.0;
+
+            /* connected nodes resist */
+            const connected = isEdgeConnected(n.id, hovId);
+            const connFactor = connected ? CONNECTED_RESIST : 1.0;
+
+            targetX = (ddx / dist) * force * hovFactor * connFactor;
+            targetY = (ddy / dist) * force * hovFactor * connFactor;
+          }
+        }
+
+        /* spring integration */
+        const isHovered = hovId === n.id;
+        const stiffness = isHovered ? HOVER_STIFFNESS : SPRING_STIFFNESS;
+        const damping   = isHovered ? HOVER_DAMPING   : SPRING_DAMPING;
+
+        const ax = (targetX - p.sx) * stiffness * DT - p.vx * damping * DT;
+        const ay = (targetY - p.sy) * stiffness * DT - p.vy * damping * DT;
+        p.vx += ax;
+        p.vy += ay;
+        p.sx += p.vx * DT;
+        p.sy += p.vy * DT;
+
+        /* clamp to max safe displacement */
+        const maxAbs = 16;
+        p.sx = Math.max(-maxAbs, Math.min(maxAbs, p.sx));
+        p.sy = Math.max(-maxAbs, Math.min(maxAbs, p.sy));
+
+        /* apply transform to outer node div */
+        if (outerEl) {
+          outerEl.style.transform =
+            `translate(calc(-50% + ${p.sx.toFixed(2)}px), calc(-50% + ${p.sy.toFixed(2)}px))`;
+        }
+      }
+
+      /* ── step 2: read displaced coords for SVG ─── */
+      const coords: Record<string,{x:number;y:number}> = {};
       for (const n of nodes){
         const el=nodeIconRefs.current[n.id]?.current;
         if (!el) continue;
@@ -196,14 +304,14 @@ export function Skills() {
         coords[n.id]={x:r.left-cr.left+r.width/2, y:r.top-cr.top+r.height/2};
       }
 
-      const {id:hovId,phase}=hoverRef.current;
-      const activeNode=hovId?getNode(hovId):null;
+      const {id:hovIdFull,phase}=hoverRef.current;
+      const activeNode=hovIdFull?getNode(hovIdFull):null;
       const lineColor=activeNode?.color??"#2dd4bf";
 
       /* ambient glow overlay */
       if (ambientRef.current){
-        if (hovId && activeNode){
-          const nc=coords[hovId];
+        if (hovIdFull && activeNode){
+          const nc=coords[hovIdFull];
           if (nc){
             const pct=(x:number,dim:number)=>`${((x/dim)*100).toFixed(1)}%`;
             const w=cr.width, h=cr.height;
@@ -221,14 +329,13 @@ export function Skills() {
         if (!ca||!cb) continue;
         const d=buildPath(ca.x,ca.y,cb.x,cb.y,edge.b1,edge.b2);
 
-        const isIncoming=edge.b===hovId;
-        const isOutgoing=edge.a===hovId;
-        const edgeActive=hovId!==null&&(
+        const isIncoming=edge.b===hovIdFull;
+        const isOutgoing=edge.a===hovIdFull;
+        const edgeActive=hovIdFull!==null&&(
           (isIncoming&&phase>=1)||(isOutgoing&&phase>=3)
         );
         const wasRevealed=revealedRef.current.has(key);
 
-        /* track activation timing */
         if (edgeActive && activatedAt.current[key]==null){
           activatedAt.current[key]=now;
           deactivatedAt.current[key]=null;
@@ -238,7 +345,6 @@ export function Skills() {
           activatedAt.current[key]=null;
         }
 
-        /* compute draw progress */
         let drawProg=0, fadeProg=1;
         if (edgeActive && activatedAt.current[key]!=null){
           drawProg=easeOutCubic((now-activatedAt.current[key]!)/DRAW_IN);
@@ -248,7 +354,6 @@ export function Skills() {
           if (fadeProg<0){fadeProg=0;deactivatedAt.current[key]=null;}
         }
 
-        /* main path */
         const main=mainPathRefs.current[key];
         if (main && d){
           main.setAttribute("d",d);
@@ -265,7 +370,6 @@ export function Skills() {
             main.style.strokeDasharray="1";
             main.style.strokeDashoffset="0";
           } else if (wasRevealed){
-            /* idle — nearly invisible ghost */
             main.style.stroke="rgba(255,255,255,0.032)";
             main.style.strokeOpacity="1";
             main.style.strokeDasharray="";
@@ -276,7 +380,6 @@ export function Skills() {
           }
         }
 
-        /* glow path */
         const glow=glowPathRefs.current[key];
         if (glow && d){
           glow.setAttribute("d",d);
@@ -292,7 +395,6 @@ export function Skills() {
           }
         }
 
-        /* pulse */
         const pulse=pulseRefs.current[key];
         if (pulse && d){
           pulse.style.offsetPath=`path("${d}")`;
@@ -340,9 +442,10 @@ export function Skills() {
         <div ref={containerRef}
           className="relative max-w-5xl mx-auto select-none"
           style={{paddingBottom:"52%"}}
-          onMouseLeave={handleLeave}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleContainerLeave}
         >
-          {/* ambient glow — color shifts on hover */}
+          {/* ambient glow */}
           <div ref={ambientRef}
             className="absolute inset-0 pointer-events-none"
             style={{transition:"background 0.7s ease", zIndex:0}}
@@ -399,6 +502,7 @@ export function Skills() {
                 isSelf={isSelf} isConnected={isConnected}
                 isDimmed={isDimmed} showTip={showTip}
                 iconRef={nodeIconRefs.current[node.id] as RefObject<HTMLDivElement>}
+                outerRef={(el) => { nodeOuterRefs.current[node.id] = el; }}
                 onEnter={()=>handleEnter(node.id)}
                 onLeave={handleLeave}
               />
@@ -418,23 +522,30 @@ export function Skills() {
    NODE CARD
 ══════════════════════════════════════════════════════════════════ */
 function NodeCard({
-  node,index,visible,isSelf,isConnected,isDimmed,showTip,iconRef,onEnter,onLeave,
+  node,index,visible,isSelf,isConnected,isDimmed,showTip,iconRef,outerRef,onEnter,onLeave,
 }:{
   node:NodeDef;index:number;visible:boolean;
   isSelf:boolean;isConnected:boolean;isDimmed:boolean;showTip:boolean;
-  iconRef:RefObject<HTMLDivElement>;onEnter:()=>void;onLeave:()=>void;
+  iconRef:RefObject<HTMLDivElement>;
+  outerRef:(el:HTMLDivElement|null)=>void;
+  onEnter:()=>void;onLeave:()=>void;
 }){
   return(
-    <div style={{
-      position:"absolute",left:`${node.x}%`,top:`${node.y}%`,
-      transform:"translate(-50%,-50%)",
-      zIndex:isSelf?20:isConnected?15:10,
-    }}>
+    /* physics displacement is applied to this div's transform imperatively */
+    <div
+      ref={outerRef}
+      style={{
+        position:"absolute",left:`${node.x}%`,top:`${node.y}%`,
+        transform:"translate(-50%,-50%)",
+        zIndex:isSelf?20:isConnected?15:10,
+        willChange:"transform",
+      }}
+    >
       {/* entry spring + opacity dimming */}
       <motion.div
         initial={{opacity:0,scale:0.12,x:node.entryX,y:node.entryY}}
         animate={visible
-          ?{opacity:1,scale:1,x:0,y:0}
+          ?{opacity:isDimmed?0.22:1,scale:1,x:0,y:0}
           :{opacity:0,scale:0.12,x:node.entryX,y:node.entryY}}
         transition={{type:"spring",stiffness:120,damping:20,mass:1.4,
           opacity:{duration:0.3}}}
@@ -457,7 +568,7 @@ function NodeCard({
             {node.renderIcon(isSelf||isConnected)}
           </motion.div>
 
-          {/* tooltip — NO labels, only name in tooltip */}
+          {/* tooltip */}
           <AnimatePresence>
             {showTip&&(
               <motion.div key="tip"
