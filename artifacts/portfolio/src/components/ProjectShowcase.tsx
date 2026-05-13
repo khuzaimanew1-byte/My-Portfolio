@@ -47,19 +47,19 @@ export function ProjectShowcase() {
   return (
     <section
       id="project"
-      className="py-32 relative bg-secondary/20 border-y border-border"
+      className="py-16 lg:py-20 relative bg-secondary/20 border-y border-border"
     >
       <div className="container mx-auto px-6">
         {/* Header */}
-        <div className="max-w-3xl mb-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+        <div className="max-w-3xl mb-10 lg:mb-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             Flagship Project
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             Nexus POS
           </h2>
-          <p className="text-xl text-muted-foreground leading-relaxed">
+          <p className="text-base lg:text-lg text-muted-foreground leading-relaxed">
             A fully functional, web-based Point of Sale application for modern
             small businesses — cafes, retail shops, and multi-category stores.
             Focused on three principles: speed, clarity, and professional UX.
@@ -67,10 +67,10 @@ export function ProjectShowcase() {
         </div>
 
         {/* Problem + Stack */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-24">
-          <div className="space-y-6">
-            <h3 className="text-2xl font-semibold">The Problem</h3>
-            <ul className="space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 mb-12 lg:mb-16">
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">The Problem</h3>
+            <ul className="space-y-4">
               {[
                 {
                   label: "SLOW",
@@ -86,29 +86,29 @@ export function ProjectShowcase() {
                 },
               ].map(({ label, text }) => (
                 <li key={label} className="flex gap-4 items-start">
-                  <span className="text-destructive font-mono font-semibold shrink-0 mt-0.5 text-sm tracking-widest">
+                  <span className="text-destructive font-mono font-semibold shrink-0 mt-0.5 text-xs tracking-widest">
                     {label}
                   </span>
-                  <span className="text-muted-foreground">{text}</span>
+                  <span className="text-muted-foreground text-sm lg:text-base">{text}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-2xl font-semibold">The Stack</h3>
-            <div className="flex flex-wrap gap-3">
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">The Stack</h3>
+            <div className="flex flex-wrap gap-2">
               {["React", "Node.js", "Express.js", "MongoDB"].map((tech) => (
                 <span
                   key={tech}
-                  className="px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium"
+                  className="px-3 py-1.5 bg-card border border-border rounded-lg text-sm font-medium"
                 >
                   {tech}
                 </span>
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-8">
+            <div className="grid grid-cols-3 gap-3 mt-5">
               {[
                 { value: "4", label: "Core Screens" },
                 { value: "1-Click", label: "Checkout Flow" },
@@ -116,9 +116,9 @@ export function ProjectShowcase() {
               ].map(({ value, label }) => (
                 <div
                   key={label}
-                  className="p-4 border border-border rounded-xl bg-card"
+                  className="p-3 border border-border rounded-xl bg-card"
                 >
-                  <div className="text-2xl font-bold text-primary mb-1">
+                  <div className="text-xl lg:text-2xl font-bold text-primary mb-0.5">
                     {value}
                   </div>
                   <div className="text-xs text-muted-foreground">{label}</div>
@@ -129,7 +129,7 @@ export function ProjectShowcase() {
         </div>
 
         {/* Screens */}
-        <div className="space-y-32">
+        <div className="space-y-16 lg:space-y-20">
           {screens.map(({ number, title, description, image, alt, reverse }) => (
             <motion.div
               key={number}
@@ -139,7 +139,7 @@ export function ProjectShowcase() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className={`flex flex-col ${
                 reverse ? "lg:flex-row-reverse" : "lg:flex-row"
-              } gap-12 items-center`}
+              } gap-8 lg:gap-10 items-center`}
             >
               {/* Screenshot */}
               <motion.div
@@ -159,12 +159,12 @@ export function ProjectShowcase() {
               </motion.div>
 
               {/* Text */}
-              <div className="w-full lg:w-[38%] space-y-5">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 border border-primary/30 text-primary font-bold text-sm">
+              <div className="w-full lg:w-[38%] space-y-3 lg:space-y-4">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/15 border border-primary/30 text-primary font-bold text-xs">
                   {number}
                 </div>
-                <h3 className="text-3xl font-bold tracking-tight">{title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
+                <h3 className="text-2xl lg:text-3xl font-bold tracking-tight">{title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm lg:text-base">
                   {description}
                 </p>
               </div>
