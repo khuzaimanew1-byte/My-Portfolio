@@ -47,16 +47,16 @@ export function ProjectShowcase() {
   return (
     <section
       id="project"
-      className="py-16 lg:py-20 relative bg-secondary/20 border-y border-border"
+      className="py-10 lg:py-16 relative bg-secondary/20 border-y border-border"
     >
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 max-w-6xl">
         {/* Header */}
-        <div className="max-w-3xl mb-10 lg:mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
+        <div className="max-w-3xl mb-7 lg:mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             Flagship Project
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
             Nexus POS
           </h2>
           <p className="text-base lg:text-lg text-muted-foreground leading-relaxed">
@@ -67,7 +67,7 @@ export function ProjectShowcase() {
         </div>
 
         {/* Problem + Stack */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 mb-12 lg:mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8 lg:mb-10">
           <div className="space-y-4">
             <h3 className="text-xl font-semibold">The Problem</h3>
             <ul className="space-y-4">
@@ -129,7 +129,7 @@ export function ProjectShowcase() {
         </div>
 
         {/* Screens */}
-        <div className="space-y-16 lg:space-y-20">
+        <div className="space-y-10 lg:space-y-14">
           {screens.map(({ number, title, description, image, alt, reverse }) => (
             <motion.div
               key={number}
@@ -139,7 +139,7 @@ export function ProjectShowcase() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className={`flex flex-col ${
                 reverse ? "lg:flex-row-reverse" : "lg:flex-row"
-              } gap-8 lg:gap-10 items-center`}
+              } gap-6 lg:gap-8 items-center`}
             >
               {/* Screenshot */}
               <motion.div
@@ -159,12 +159,12 @@ export function ProjectShowcase() {
               </motion.div>
 
               {/* Text */}
-              <div className="w-full lg:w-[38%] space-y-3 lg:space-y-4">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/15 border border-primary/30 text-primary font-bold text-xs">
+              <div className="w-full lg:w-[38%] space-y-2 lg:space-y-3">
+                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 border border-primary/30 text-primary font-bold text-xs">
                   {number}
                 </div>
-                <h3 className="text-2xl lg:text-3xl font-bold tracking-tight">{title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm lg:text-base">
+                <h3 className="text-xl lg:text-2xl font-bold tracking-tight">{title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
                   {description}
                 </p>
               </div>

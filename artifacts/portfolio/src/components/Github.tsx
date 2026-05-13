@@ -3,7 +3,7 @@ import { GithubIcon } from "lucide-react";
 
 export function Github() {
   return (
-    <section className="py-10 lg:py-14">
+    <section className="py-7 lg:py-9">
       <div className="container mx-auto px-6 max-w-4xl">
         <a
           href="https://github.com/khuzaimanew1-byte/"
@@ -13,7 +13,7 @@ export function Github() {
         >
           <motion.div
             whileHover={{ y: -4 }}
-            className="p-6 md:p-8 rounded-3xl bg-card border border-border hover:border-primary/50 transition-all relative overflow-hidden"
+            className="p-5 md:p-6 rounded-3xl bg-card border border-border hover:border-primary/50 transition-all relative overflow-hidden"
           >
             <div className="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-primary/10 transition-colors" />
 

@@ -76,7 +76,7 @@ export function Hero() {
     <section
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-[88vh] flex items-center justify-center overflow-hidden py-16 lg:py-20"
+      className="relative min-h-[78vh] flex items-center justify-center overflow-hidden py-10 lg:py-12"
     >
       {/* base gradient */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_120%_80%_at_60%_40%,hsl(var(--primary)/0.07)_0%,transparent_65%)]" />
@@ -127,13 +127,13 @@ export function Hero() {
       />
 
       {/* content */}
-      <div className="container relative z-10 mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+      <div className="container relative z-10 mx-auto px-6 max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
         {/* text side */}
         <motion.div
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col gap-5 lg:gap-6"
+          className="flex flex-col gap-4 lg:gap-5"
         >
           {/* eyebrow */}
           <motion.div
@@ -154,7 +154,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.7 }}
-              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.06]"
+              className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-[1.06]"
             >
               Hi, I'm{" "}
               <span className="text-primary">Khuzaima.</span>
@@ -165,7 +165,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.7 }}
-              className="text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-foreground/85 min-h-[1.2em] flex items-center gap-1"
+              className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground/85 min-h-[1.2em] flex items-center gap-1"
             >
               <span>I build&nbsp;</span>
               <span className="text-primary">{displayed}</span>
@@ -179,7 +179,7 @@ export function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.6 }}
-              className="text-base lg:text-lg text-muted-foreground max-w-[440px] leading-relaxed mt-1"
+              className="text-sm lg:text-base text-muted-foreground max-w-[420px] leading-relaxed mt-1"
             >
               Focused on structure, clarity, and building systems that hold up under real-world conditions.
             </motion.p>
@@ -228,7 +228,7 @@ export function Hero() {
           <motion.img
             src={heroImg}
             alt="Khuzaima Asif"
-            className="relative z-10 w-full max-w-xs lg:max-w-sm object-contain drop-shadow-2xl"
+            className="relative z-10 w-full max-w-[240px] lg:max-w-[280px] object-contain drop-shadow-2xl"
             whileHover={{ scale: 1.025 }}
             transition={{ type: "spring", stiffness: 200, damping: 24 }}
           />
