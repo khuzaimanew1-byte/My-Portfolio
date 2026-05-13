@@ -1,0 +1,96 @@
+Deeply refactor the entire portfolio for real laptop full-screen optimization and proportional responsiveness.
+
+CURRENT PROBLEMS:
+
+* elements/components look oversized on laptop screens
+* excessive empty space and stretched layouts
+* weak visual density balance
+* inconsistent spacing rhythm
+* sections feel like isolated fullscreen blocks
+* typography scales too aggressively
+* some content areas feel compressed while surrounding space is wasted
+
+IMPORTANT:
+Do NOT globally shrink everything.
+Professionally rebalance the entire layout system.
+
+OPTIMIZE SPECIFICALLY FOR:
+
+* 1280px
+* 1366px
+* 1440px
+* 1536px
+* 1600px
+* 1920px laptop/fullscreen usage
+
+GLOBAL IMPROVEMENTS:
+
+* reduce excessive vertical spacing
+* rebalance section heights
+* improve content density intelligently
+* tighten layout composition
+* optimize container widths/max-widths
+* create smoother spacing rhythm between sections
+* improve visual flow across the entire page
+* maintain cinematic feel without oversized scaling
+* create better proportional hierarchy on desktop/laptop screens
+
+HERO SECTION:
+
+* reduce oversized text scaling
+* rebalance hero image/text proportions
+* tighten CTA grouping
+* reduce excessive horizontal spread
+* improve fullscreen composition
+
+TECHNICAL ARSENAL:
+
+* icons are too spread apart
+* tighten ecosystem spacing by ~15–20%
+* improve layered depth instead of extreme horizontal distribution
+* make the network feel denser and more immersive on laptop screens
+
+PROJECTS SECTION:
+
+* increase usable content width
+* reduce surrounding empty space
+* improve card scale proportionality
+* rebalance grid spacing
+
+ARCHITECTURE / CONTENT SECTIONS:
+
+* improve readable text width
+* reduce wasted side spacing
+* create more balanced composition
+
+CONTACT / FOOTER:
+
+* reduce detached feeling
+* tighten vertical composition
+* create more premium compact CTA structure
+
+RESPONSIVE SYSTEM:
+Create intelligent responsive scaling for:
+
+* typography
+* section padding
+* spacing rhythm
+* container widths
+* grid gaps
+* card scaling
+* interaction scale
+* visual density
+
+Avoid relying only on `vw` scaling.
+Use breakpoint-based proportional balancing.
+
+VISUAL GOAL:
+
+* Apple-level spacing intelligence
+* cinematic but efficient
+* immersive but compact
+* premium product-site feel
+* balanced fullscreen composition
+* psychologically optimized layout density
+
+Maintain existing animations, aesthetics, and design language while making the entire portfolio feel professionally optimized for real laptop full-screen usage.

@@ -96,10 +96,11 @@ const edgeRevealAt: Record<string,number> = {
 };
 const ek = (e:EdgeDef) => `${e.a}::${e.b}`;
 
-const ICON_R    = 16;
-const DRAW_IN   = 580;
-const DRAW_OUT  = 220;
-const PULSE_DUR = 880;
+const ICON_R       = 16;
+const INCOMING_DUR = 520;  /* ms: incoming line draws toward hovered node  */
+const OUTGOING_DUR = 480;  /* ms: outgoing line propagates from hovered node */
+const PULSE_LOOP   = 860;  /* ms: looping pulse period after full draw      */
+const FADE_DUR     = 340;  /* ms: opacity fade-out on hover leave           */
 
 /* ─── physics constants ──────────────────────────────────────── */
 const REPULSION_RADIUS  = 140;  // px — cursor influence radius
@@ -169,8 +170,10 @@ export function Skills() {
   );
 
   /* draw-timing refs */
-  const activatedAt   = useRef<Record<string,number|null>>({});
-  const deactivatedAt = useRef<Record<string,number|null>>({});
+  const hoverStartRef    = useRef<number | null>(null);
+  const hoverLeaveAtRef  = useRef<number | null>(null);
+  const hovDurAtLeaveRef = useRef<number>(0);
+  const lastHoveredIdRef = useRef<string | null>(null);
 
   /* state */
   const [nodesVisible, setNodesVisible] = useState<boolean[]>(()=>nodes.map(()=>false));
