@@ -1,0 +1,73 @@
+Create a premium multi-layer interactive background system for the entire portfolio.
+
+GOAL:
+Make the website feel like a living cinematic AI operating environment — immersive, reactive, atmospheric, and futuristic.
+
+IMPORTANT:
+Keep everything subtle, premium, performant, and Replit-friendly.
+Avoid flashy particles, gaming RGB, or chaotic motion.
+
+BACKGROUND SYSTEM:
+Build 5–6 layered atmospheric depth system using lightweight performant techniques.
+
+LAYERS:
+
+1. deep cinematic gradient atmosphere
+2. soft ambient glow fields
+3. ultra subtle neural/grid texture
+4. floating transparent depth panels/shapes
+5. interactive environmental entities
+6. slow atmospheric pulse system
+
+INTERACTIVE ENTITIES:
+Add ultra-subtle reactive elements inside the environment:
+
+* faint neural nodes
+* soft energy threads/connections
+* depth particles
+* atmospheric distortion zones
+
+CURSOR INTERACTION:
+
+* nearby entities softly react to cursor presence
+* subtle magnetic push/pull behavior
+* glow fields slightly shift
+* nearby connection lines softly activate
+* layered parallax response
+* atmosphere should feel aware of user presence
+
+IMPORTANT:
+Do NOT create obvious cursor-follow effects.
+Everything should feel embedded into the environment.
+
+MOTION:
+
+* slow
+* cinematic
+* asynchronous
+* layered depth speeds
+* smooth spring interpolation
+* subtle environmental breathing
+
+SECTION ATMOSPHERE:
+Each section should slightly influence the environment:
+
+* Hero → focused cinematic glow
+* Technical Arsenal → stronger neural/system energy
+* Projects → calmer showcase atmosphere
+* Architecture/About → softer emotional warmth
+
+TECH REQUIREMENTS:
+
+* lightweight and performant
+* Replit free-version friendly
+* use CSS transforms, Framer Motion, gradients, SVG overlays
+* maintain smooth 60fps performance
+* responsive across laptop/mobile screens
+* avoid heavy WebGL/Three.js simulations unless optimized carefully
+
+VISUAL DIRECTION:
+Apple-level cinematic depth + sci-fi HUD atmosphere + futuristic neural ecosystem + premium AI operating environment.
+
+GOAL:
+The website should feel like it exists inside a living intelligent cinematic system — not a static page with animated background effects.

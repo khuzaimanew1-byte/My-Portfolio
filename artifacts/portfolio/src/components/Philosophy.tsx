@@ -21,7 +21,7 @@ const pillars = [
 
 export function Philosophy() {
   return (
-    <section className="py-10 lg:py-14 bg-background">
+    <section className="py-10 lg:py-14 bg-background/65">
       <div className="container mx-auto px-6 max-w-6xl">
         <div className="mb-7">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">Core Philosophy</h2>
