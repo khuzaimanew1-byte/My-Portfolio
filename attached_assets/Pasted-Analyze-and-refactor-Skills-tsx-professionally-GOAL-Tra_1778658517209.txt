@@ -1,0 +1,61 @@
+Analyze and refactor `Skills.tsx` professionally.
+
+GOAL:
+Transform the section into a cinematic neural-system visualization with synchronized node motion, realistic connections, intelligent scatter positioning, and immersive chain-reaction interactions.
+
+LAYOUT:
+
+* Do NOT use grids, rows, circles, or symmetry
+* Create an organized scatter layout
+* Asymmetrical but visually balanced
+* Natural eye flow and cinematic spacing
+* No overcrowding
+* Intentional randomness with clean negative space
+
+NODE INTRO:
+
+* Nodes should NOT appear instantly
+* Initially hidden/off-position
+* Nodes should travel into the scene dynamically
+* Make it feel like nodes are searching for and forming connections
+* Connections progressively form while nodes arrive
+* Intro should feel like a living technical ecosystem assembling itself
+
+HOVER FLOW:
+
+1. incoming connection activates first
+2. hovered node energizes
+3. outgoing connections activate after
+4. connected nodes softly activate
+5. tooltip smoothly emerges
+
+Avoid all lines activating simultaneously.
+
+CRITICAL FIXES:
+
+* Replace static SVG coordinates with live DOM-based coordinates using refs + `getBoundingClientRect()`
+* SVG paths must follow actual rendered node positions in realtime
+* Remove fake coordinate scaling system
+* Unify all transforms into one synchronized motion system
+* Fix line attachment so paths land naturally near icon edges
+* Replace blur-heavy glow with thin sharp premium strokes
+* Replace SVG `animateMotion` with Framer Motion based energy pulse animation
+* Create hover hierarchy:
+
+  * hovered node strongest
+  * connected nodes secondary
+  * unrelated nodes dimmed
+* Create stable layer architecture for:
+
+  * background
+  * inactive lines
+  * active lines
+  * nodes
+  * tooltips
+* Tooltip must stay synchronized with node movement
+* Maintain responsive smooth 60fps performance
+
+VISUAL DIRECTION:
+Apple-level precision + sci-fi HUD + cinematic neural network + futuristic system architecture.
+
+Keep existing technologies/icons/design language, but deeply refactor the interaction architecture and animation system professionally.
