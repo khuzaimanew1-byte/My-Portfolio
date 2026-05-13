@@ -453,7 +453,7 @@ export function Skills() {
 
   /* ── render ─── */
   return (
-    <section ref={sectionRef} className="py-10 lg:py-14 relative overflow-hidden">
+    <section ref={sectionRef} className="py-10 lg:py-14 xl:py-16 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" style={{
         background:"radial-gradient(ellipse 80% 60% at 50% 50%, transparent 34%, rgba(4,8,14,0.7) 100%)"
       }}/>
@@ -461,20 +461,20 @@ export function Skills() {
       <div className="container mx-auto px-6 relative z-10">
         <motion.div
           initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}}
-          viewport={{once:true}} className="text-center max-w-2xl mx-auto mb-7 lg:mb-10"
+          viewport={{once:true}} className="text-center max-w-2xl xl:max-w-3xl mx-auto mb-7 lg:mb-10 xl:mb-12"
         >
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-[2.6rem] font-bold tracking-tight mb-3">
             Technical Arsenal
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg xl:text-xl">
             The tools and technologies powering every system I build.
           </p>
         </motion.div>
 
         {/* network stage */}
         <div ref={containerRef}
-          className="relative max-w-5xl mx-auto select-none"
-          style={{paddingBottom:"45%"}}
+          className="relative mx-auto select-none max-w-5xl xl:max-w-[1200px] 2xl:max-w-[1360px]"
+          style={{height:"clamp(420px, 38vw, 560px)"}}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleContainerLeave}
         >
