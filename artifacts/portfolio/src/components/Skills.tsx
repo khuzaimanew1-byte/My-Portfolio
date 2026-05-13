@@ -369,15 +369,11 @@ export function Skills() {
               ? drawProg
               : ((t - INCOMING_DUR) % PULSE_LOOP) / PULSE_LOOP;
           } else {
-            /* outgoing — starts exactly when incoming draw completes */
-            const outT = t - INCOMING_DUR;
-            if (outT > 0) {
-              drawProg = easeOutCubic(Math.min(1, outT / OUTGOING_DUR));
-              pulsePos = drawProg < 1
-                ? drawProg
-                : ((outT - OUTGOING_DUR) % PULSE_LOOP) / PULSE_LOOP;
-            }
-            /* drawProg stays 0, pulsePos stays -1 until outT > 0 */
+            /* outgoing — animates simultaneously with incoming, no delay */
+            drawProg = easeOutCubic(Math.min(1, t / OUTGOING_DUR));
+            pulsePos = drawProg < 1
+              ? drawProg
+              : ((t - OUTGOING_DUR) % PULSE_LOOP) / PULSE_LOOP;
           }
 
         } else if (!isHovering && leaveAt !== null && (isIncoming || isOutgoing)) {
@@ -388,8 +384,7 @@ export function Skills() {
           if (isIncoming) {
             drawProg = easeOutCubic(Math.min(1, hovDurAtLeave / INCOMING_DUR));
           } else {
-            const outT = hovDurAtLeave - INCOMING_DUR;
-            drawProg   = outT > 0 ? easeOutCubic(Math.min(1, outT / OUTGOING_DUR)) : 0;
+            drawProg = easeOutCubic(Math.min(1, hovDurAtLeave / OUTGOING_DUR));
           }
           /* no pulse during fade */
         }
